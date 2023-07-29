@@ -1,9 +1,9 @@
 clean:
 	cargo clean
 init:
-	cargo install cargo-audit
-	cargo install cargo-outdated
-	cargo install cargo-update
+	cargo install --force cargo-audit
+	cargo install --force cargo-outdated
+	cargo install --force cargo-update
 init_arch:
 	pacman -S which yt-dlp --needed
 init_mac:
