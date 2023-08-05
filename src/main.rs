@@ -83,7 +83,7 @@ fn main() -> io::Result<()> {
     // Change your destination path in here.
 
     let os_running = env::consts::OS;
-    println!(format!("Download complete, starting to move to NAS, according to OS: {}", os_running));
+    println!("Download complete, starting to move to NAS, according to OS: {}", os_running);
     let mut path_to_nas = "/home/phiro/mounts/Volume_1/youtube/";
     if os_running.eq("macos") {
         path_to_nas = "/Volumes/Volume_1/youtube/";
