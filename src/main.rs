@@ -81,8 +81,8 @@ fn main() -> io::Result<()> {
         t.join().expect("Could not join thread");
     }
     // Change your destination path in here.
-    println!("Download complete, starting to move");
-    let move_result = move_to_nas(folder_name.clone(), format!("/Volumes/Volume_1/youtube/{}", &folder_name));
+    println!("Download complete, starting to move to NAS");
+    let move_result = move_to_nas(folder_name.clone(), format!("/home/phiro/mounts/Volume_1/youtube/{}", &folder_name));
     if move_result {
         println!("Move complete")
     } else {
