@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::process::{Command, Stdio};
-use std::{fs, thread};
+use std::{env, fs, thread};
 use chrono::Local;
 
 fn check_downloader_present() -> bool {
@@ -81,8 +81,14 @@ fn main() -> io::Result<()> {
         t.join().expect("Could not join thread");
     }
     // Change your destination path in here.
-    println!("Download complete, starting to move to NAS");
-    let move_result = move_to_nas(folder_name.clone(), format!("/home/phiro/mounts/Volume_1/youtube/{}", &folder_name));
+
+    let os_running = env::consts::OS;
+    println!(format!("Download complete, starting to move to NAS, according to OS: {}", os_running));
+    let mut path_to_nas = "/home/phiro/mounts/Volume_1/youtube/";
+    if os_running.eq("macos") {
+        path_to_nas = "/Volumes/Volume_1/youtube/";
+    }
+    let move_result = move_to_nas(folder_name.clone(), format!( "{}{}", path_to_nas, &folder_name));
     if move_result {
         println!("Move complete")
     } else {
