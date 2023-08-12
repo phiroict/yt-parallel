@@ -52,7 +52,7 @@ fn main() -> io::Result<()> {
         lines.push(line);
     }
     // Create an array that can hold all the thread handles so we can join them down the line
-    let mut threadpool = vec![];
+    let mut thread_pool = vec![];
     // Process the lines in the array, create a thread for each download
     for line in &lines {
         // Do something with each line
@@ -73,10 +73,10 @@ fn main() -> io::Result<()> {
                 .expect("Failed to execute yt-dlp command, you may need to install it.");
         });
         println!("Created thread {:?} for youtube url {}", t.thread().id() ,line);
-        threadpool.push(t);
+        thread_pool.push(t);
     }
 
-    for t in threadpool {
+    for t in thread_pool {
         println!("Joining thread {:?} ", t.thread().id());
         t.join().expect("Could not join thread");
     }
