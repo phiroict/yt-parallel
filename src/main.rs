@@ -3,6 +3,7 @@ use std::io::{self, BufRead};
 use std::process::{Command, Stdio};
 use std::{env, fs, thread};
 use chrono::Local;
+use std::sync::mpsc::sync_channel;
 
 fn check_downloader_present() -> bool {
     let command = "yt-dlp";
@@ -29,6 +30,8 @@ fn move_to_nas(source: String, target: String) -> bool {
 }
 
 fn main() -> io::Result<()> {
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
+    println!("Running version {}", VERSION);
     let yt_downloader_is_present = check_downloader_present();
     if ! yt_downloader_is_present {
         panic!("yt-dlp is not present, not possible to continue");
@@ -51,10 +54,12 @@ fn main() -> io::Result<()> {
         // Add the line to the vector
         lines.push(line);
     }
+    let (tx, rx) = sync_channel(lines.len());
     // Create an array that can hold all the thread handles so we can join them down the line
     let mut thread_pool = vec![];
     // Process the lines in the array, create a thread for each download
     for line in &lines {
+        let tx= tx.clone();
         // Do something with each line
         println!("Processing {}", line);
         let cline = line.clone();
@@ -71,11 +76,15 @@ fn main() -> io::Result<()> {
                 .stderr(Stdio::piped())
                 .output()
                 .expect("Failed to execute yt-dlp command, you may need to install it.");
+            tx.send(format!("Downloaded {}", &cline)).expect("Could not sent message");
         });
         println!("Created thread {:?} for youtube url {}", t.thread().id() ,line);
         thread_pool.push(t);
     }
-
+    drop(tx);
+    while let Ok(msg) = rx.recv() {
+        println!("{msg}");
+    }
     for t in thread_pool {
         println!("Joining thread {:?} ", t.thread().id());
         t.join().expect("Could not join thread");
