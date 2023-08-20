@@ -23,9 +23,14 @@ run:
 deploy: check
 	cargo build --release && cargo semver bump patch && sudo -S cp target/release/yt-parallel /usr/local/bin/
 build_container_arm:
-	docker build --platform linux/x86_64 -t phiroict/yt-parallel:0.2.5 -f deploy/docker/Dockerfile_arm .
+	docker build --platform linux/x86_64 -t phiroict/yt-parallel:0.2.6 -f deploy/docker/Dockerfile_arm .
 run_container_arm:
-	docker run --platform linux/x86_64 -it --mount type=bind,source=.,target=/home/phiro/mounts/Volume_1/youtube/ phiroict/yt-parallel:0.2.5
+	docker run \
+		--platform linux/x86_64 \
+		-it \
+		--mount type=bind,source=.,target=/home/phiro/mounts/Volume_1/youtube/ \
+		--mount type=bind,source=$(shell pwd)/videolist.txt,target=/app/source/videolist.txt \
+		phiroict/yt-parallel:0.2.6
 build_linux_arm:
 	cargo build --release --target x86_64-unknown-linux-gnu
 all_container_arm: build_linux_arm build_container_arm run_container_arm

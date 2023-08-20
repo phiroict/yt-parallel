@@ -4,6 +4,15 @@ use std::process::{Command, Stdio};
 use std::{env, fs, thread};
 use chrono::Local;
 use std::sync::mpsc::sync_channel;
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Location of the videolist.txt file
+    #[arg(short, long, default_value_t = String::from("./videolist.txt"))]
+    location_video_list: String,
+}
 
 fn check_downloader_present() -> bool {
     let command = "yt-dlp";
@@ -18,6 +27,7 @@ fn check_downloader_present() -> bool {
     } else {
         false
     }
+
 }
 
 fn move_to_nas(source: String, target: String) -> bool {
@@ -38,6 +48,9 @@ fn move_to_nas(source: String, target: String) -> bool {
 }
 
 fn main() -> io::Result<()> {
+    // Get arguments commandline
+    let args = Args::parse();
+    println!("File to parse: {}", args.location_video_list);
     // Get the current version, this is baked into the application and can be extracted as a ENV var
     const VERSION: &str = env!("CARGO_PKG_VERSION");
     println!("Running version {}", VERSION);
@@ -51,7 +64,7 @@ fn main() -> io::Result<()> {
     fs::create_dir(&folder_name)?;
 
     // Open the file, hardcoded here as it is part of te fixed setup.
-    let file = File::open("videolist.txt")?;
+    let file = File::open(args.location_video_list)?;
 
     // Create a vector to store the lines that consists of urls to a youtube (or other) clip.
     let mut lines: Vec<String> = Vec::new();
