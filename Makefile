@@ -22,7 +22,7 @@ build: check
 run:
 	cargo run
 deploy: check
-	cargo semver bump patch && cargo build --release &&  sudo -S cp target/release/yt-parallel /usr/local/bin/ && git tag v$(shell get_version_from_toml.sh)
+	cargo semver bump patch && cargo build --release &&  sudo -S cp target/release/yt-parallel /usr/local/bin/ && git tag v$(shell bash get_version_from_toml.sh)
 build_container_arm:
 	docker build --platform linux/x86_64 -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
 run_container_arm:
@@ -37,3 +37,5 @@ build_linux_arm:
 all_container_arm: build_linux_arm build_container_arm run_container_arm
 push_container:
 	docker push phiroict/yt-parallel:$(APP_VERSION)
+deploy_container: build_linux_arm build_container_arm push_container
+
