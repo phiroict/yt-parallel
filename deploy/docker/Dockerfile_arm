@@ -1,0 +1,7 @@
+FROM debian:trixie-slim
+RUN apt-get update && apt-get upgrade -y && apt-get install yt-dlp -y && apt-get clean
+RUN mkdir -p /app && mkdir -p /home/phiro/mounts/Volume_1/youtube/
+WORKDIR /app
+COPY target/x86_64-unknown-linux-gnu/release/yt-parallel .
+COPY videolist.txt .
+CMD ["./yt-parallel"]
