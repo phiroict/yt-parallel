@@ -1,3 +1,4 @@
+APP_VERSION ?= $(shell bash get_version_from_toml.sh)
 init_arm:
 	rustup target add x86_64-unknown-linux-gnu
 	brew install SergioBenitez/osxct/x86_64-unknown-linux-gnu
@@ -21,16 +22,18 @@ build: check
 run:
 	cargo run
 deploy: check
-	cargo build --release && cargo semver bump patch && sudo -S cp target/release/yt-parallel /usr/local/bin/
+	cargo semver bump patch && cargo build --release &&  sudo -S cp target/release/yt-parallel /usr/local/bin/ && git tag v$(shell get_version_from_toml.sh)
 build_container_arm:
-	docker build --platform linux/x86_64 -t phiroict/yt-parallel:0.2.6 -f deploy/docker/Dockerfile_arm .
+	docker build --platform linux/x86_64 -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
 run_container_arm:
 	docker run \
 		--platform linux/x86_64 \
 		-it \
 		--mount type=bind,source=.,target=/home/phiro/mounts/Volume_1/youtube/ \
 		--mount type=bind,source=$(shell pwd)/videolist.txt,target=/app/source/videolist.txt \
-		phiroict/yt-parallel:0.2.6
+		phiroict/yt-parallel:$(APP_VERSION)
 build_linux_arm:
 	cargo build --release --target x86_64-unknown-linux-gnu
 all_container_arm: build_linux_arm build_container_arm run_container_arm
+push_container:
+	docker push phiroict/yt-parallel:$(APP_VERSION)
