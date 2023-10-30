@@ -137,7 +137,7 @@ fn main() -> io::Result<()> {
     // Default when running linux, I run Arch by the way 😎
     let mut path_to_nas = "/home/phiro/mounts/Volume_1/youtube/";
     if os_running.eq("macos") {
-        path_to_nas = "/Volumes/Volume_1/youtube/";
+        path_to_nas = "/Volumes/huge/media/youtube/";
     }
     // Using the MacOS/Linux move tool here, there are ways to do this in Rust but it is a bit
     // cumbersome and I did not feel like reinventing the mv statement.

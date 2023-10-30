@@ -26,7 +26,10 @@ deploy: check
 build_container_arm:
 	docker build --platform linux/x86_64 -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
 run_container_arm:
+	-docker rm yt-parallel
 	docker run \
+		--rm  \
+		--name yt-parallel \
 		--platform linux/x86_64 \
 		-it \
 		--mount type=bind,source=.,target=/home/phiro/mounts/Volume_1/youtube/ \
