@@ -31,13 +31,15 @@ fn check_downloader_present() -> bool {
 }
 
 fn move_to_nas(source: String, target: String) -> bool {
+    // Clean up failed downloads
     let _ = Command::new("rm")
-        .arg("-fr")
-        .arg("*.part")
+        .arg("-f")
+        .arg(format!("{source}/{target}/{}", "*.part"))
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()
         .expect("Could note delete the part remainders");
+    // Move over to the shared folders for serving
     let output = Command::new("mv")
         .arg(source)
         .arg(target)
@@ -45,6 +47,7 @@ fn move_to_nas(source: String, target: String) -> bool {
         .stderr(Stdio::piped())
         .output()
         .expect("Could not move to the NAS");
+    // Print out errors and other feedback of the move
     println!("StOut: {:?}", String::from_utf8(output.stdout));
     println!("StErr: {:?}", String::from_utf8(output.stderr));
     if output.status.success() {
@@ -124,7 +127,7 @@ fn main() -> io::Result<()> {
                 Or make sure it is in PATH of this executable");
             tx.send(format!("Downloaded {}", &cline)).expect("Could not sent message");
         });
-        println!("Created thread {:?} for youtube url {}", t.thread().id() ,line);
+        println!("Created thread {:?} for youtube url {line}", t.thread().id());
         thread_pool.push(t);
     }
     // Need to drop the transmitter as otherwise the receiver never stops listening.
