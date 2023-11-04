@@ -31,6 +31,13 @@ fn check_downloader_present() -> bool {
 }
 
 fn move_to_nas(source: String, target: String) -> bool {
+    let _ = Command::new("rm")
+        .arg("-fr")
+        .arg("*.part")
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()
+        .expect("Could note delete the part remainders");
     let output = Command::new("mv")
         .arg(source)
         .arg(target)
@@ -102,6 +109,12 @@ fn main() -> io::Result<()> {
             let _output = Command::new(format!("yt-dlp"))
                 .arg("--sponsorblock-remove")
                 .arg("default")
+                .arg("--retries")
+                .arg("infinite")
+                .arg("--fragment-retries")
+                .arg("infinite")
+                .arg("--buffer-size")
+                .arg("16K")
                 .arg(&cline)
                 .current_dir(cfn)
                 .stdout(Stdio::piped())
