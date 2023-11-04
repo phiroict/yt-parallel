@@ -14,6 +14,8 @@ struct Args {
     location_video_list: String,
 }
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 fn check_downloader_present() -> bool {
     let command = "yt-dlp";
 
@@ -38,7 +40,7 @@ fn move_to_nas(source: String, target: String) -> bool {
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .output()
-        .expect("Could note delete the part remainders");
+        .expect("Could not delete the part remainders");
     // Move over to the shared folders for serving
     let output = Command::new("mv")
         .arg(source)
@@ -48,8 +50,8 @@ fn move_to_nas(source: String, target: String) -> bool {
         .output()
         .expect("Could not move to the NAS");
     // Print out errors and other feedback of the move
-    println!("StOut: {:?}", String::from_utf8(output.stdout));
-    println!("StErr: {:?}", String::from_utf8(output.stderr));
+    println!("StOut: {:?}", String::from_utf8(output.stdout).unwrap());
+    println!("StErr: {:?}", String::from_utf8(output.stderr).unwrap());
     if output.status.success() {
         true
     } else {
@@ -57,15 +59,16 @@ fn move_to_nas(source: String, target: String) -> bool {
     }
 }
 
+
 fn main() -> io::Result<()> {
     // Get arguments commandline
     let args = Args::parse();
     println!("File to parse: {}", args.location_video_list);
     // Get the current version, this is baked into the application and can be extracted as a ENV var
-    const VERSION: &str = env!("CARGO_PKG_VERSION");
+
     println!("Running version {}", VERSION);
     let yt_downloader_is_present = check_downloader_present();
-    if ! yt_downloader_is_present {
+    if !yt_downloader_is_present {
         panic!("yt-dlp is not present, not possible to continue");
     }
     // Create a folder with the current datetime
