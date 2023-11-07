@@ -1,3 +1,5 @@
+mod tests;
+
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::process::{Command, Stdio};
@@ -16,7 +18,7 @@ struct Args {
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-fn check_downloader_present() -> bool {
+pub fn check_downloader_present() -> bool {
     let command = "yt-dlp";
 
     let output = Command::new("which")
