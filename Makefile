@@ -21,6 +21,8 @@ build: check
 	cargo build
 run:
 	cargo run
+run_win:
+	cd target/debug && yt-parallel.exe -l "c:/Users/phiro/Desktop/videolist.txt"
 deploy: check
 	cargo semver bump patch && cargo build --release &&  sudo -S cp target/release/yt-parallel /usr/local/bin/ && git commit -am "Release commit" && git tag v$(shell bash get_version_from_toml.sh)
 build_container_arm:

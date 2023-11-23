@@ -20,7 +20,10 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn check_downloader_present() -> bool {
     let command = "yt-dlp";
-
+    let os_running = env::consts::OS;
+    if os_running == "windows" {
+        return true;
+    }
     let output = Command::new("which")
         .arg(command)
         .output()
@@ -35,30 +38,61 @@ pub fn check_downloader_present() -> bool {
 }
 
 fn move_to_nas(source: String, target: String) -> bool {
-    // Clean up failed downloads
-    let _ = Command::new("rm")
-        .arg("-f")
-        .arg(format!("{source}/{target}/{}", "*.part"))
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output()
-        .expect("Could not delete the part remainders");
-    // Move over to the shared folders for serving
-    let output = Command::new("mv")
-        .arg(source)
-        .arg(target)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output()
-        .expect("Could not move to the NAS");
-    // Print out errors and other feedback of the move
-    println!("StOut: {:?}", String::from_utf8(output.stdout).unwrap());
-    println!("StErr: {:?}", String::from_utf8(output.stderr).unwrap());
-    if output.status.success() {
-        true
+    
+    let os_running = env::consts::OS;
+    if os_running.eq( "windows") {
+        let _ = Command::new("DEL")            
+            .arg(format!("{source}/{target}/{}", "*.part"))
+            .arg("/S")
+            .arg("/Q")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+            .expect("Could not delete the part remainders");
+        // Move over to the shared folders for serving
+        let output = Command::new("MOVE")
+            .arg(source)
+            .arg(target)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+            .expect("Could not move to the NAS");
+        // Print out errors and other feedback of the move
+        println!("StOut: {:?}", String::from_utf8(output.stdout).unwrap());
+        println!("StErr: {:?}", String::from_utf8(output.stderr).unwrap());
+        if output.status.success() {
+            true
+        } else {
+            false
+        }
     } else {
-        false
+        // Clean up failed downloads
+        let _ = Command::new("rm")
+            .arg("-f")
+            .arg(format!("{source}/{target}/{}", "*.part"))
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+            .expect("Could not delete the part remainders");
+        // Move over to the shared folders for serving
+        let output = Command::new("mv")
+            .arg(source)
+            .arg(target)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+            .expect("Could not move to the NAS");
+        // Print out errors and other feedback of the move
+        println!("StOut: {:?}", String::from_utf8(output.stdout).unwrap());
+        println!("StErr: {:?}", String::from_utf8(output.stderr).unwrap());
+        if output.status.success() {
+            true
+        } else {
+            false
+        }
+        
     }
+    
 }
 
 

@@ -1,4 +1,3 @@
-use crate::main;
 #[cfg(test)]
 mod tests {
     use crate::check_downloader_present;
