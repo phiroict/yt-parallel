@@ -1,6 +1,6 @@
 [package]
 name = "yt-parallel"
-version = "0.3.3"
+version = "0.3.4"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.31"
 clap = { version = "4.4.7", features = ["derive"] }
+which = { version = "5.0.0", features = [] }

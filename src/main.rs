@@ -7,6 +7,7 @@ use std::{env, fs, thread};
 use chrono::Local;
 use std::sync::mpsc::sync_channel;
 use clap::Parser;
+use which::which;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -20,21 +21,11 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn check_downloader_present() -> bool {
     let command = "yt-dlp";
-    let os_running = env::consts::OS;
-    if os_running == "windows" {
-        return true;
+    let is_present = which(command);
+    match is_present {
+        Ok(_) => { true }
+        Err(_) => {false}
     }
-    let output = Command::new("which")
-        .arg(command)
-        .output()
-        .expect("Failed to execute 'which' command");
-
-    if output.status.success() {
-        true
-    } else {
-        false
-    }
-
 }
 
 fn move_to_nas(source: String, target: String) -> bool {
@@ -43,8 +34,6 @@ fn move_to_nas(source: String, target: String) -> bool {
     if os_running.eq( "windows") {
         let _ = Command::new("DEL")            
             .arg(format!("{source}/{target}/{}", "*.part"))
-            .arg("/S")
-            .arg("/Q")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
@@ -193,6 +182,8 @@ fn main() -> io::Result<()> {
     let mut path_to_nas = "/home/phiro/mounts/Volume_1/youtube/";
     if os_running.eq("macos") {
         path_to_nas = "/Volumes/huge/media/youtube/";
+    } else if os_running.eq("windows") {
+        path_to_nas = "M:/youtube/";
     }
     // Using the MacOS/Linux move tool here, there are ways to do this in Rust but it is a bit
     // cumbersome and I did not feel like reinventing the mv statement.
