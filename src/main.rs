@@ -48,7 +48,7 @@ fn move_to_nas(source: String, target: String) -> bool {
         let _ = Command::new("cmd")
             .arg("/C")
             .arg("DEL")
-            .arg(format!("{source}/{target}/{}", "*.part"))
+            .arg(format!("{target}/{}", "*.part"))
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
@@ -78,7 +78,7 @@ fn move_to_nas(source: String, target: String) -> bool {
         println!("Remove the partial failed downloads" );
         let _ = Command::new("rm")
             .arg("-f")
-            .arg(format!("{source}/{target}/{}", "*.part"))
+            .arg(format!("{target}/{}", "*.part"))
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
