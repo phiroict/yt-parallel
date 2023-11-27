@@ -43,14 +43,18 @@ fn move_to_nas(source: String, target: String) -> bool {
     
     let os_running = env::consts::OS;
     if os_running.eq( "windows") {
-        let _ = Command::new("DEL")            
+        let _ = Command::new("cmd")
+            .arg("/C")
+            .arg("DEL")
             .arg(format!("{source}/{target}/{}", "*.part"))
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
             .expect("Could not delete the part remainders");
         // Move over to the shared folders for serving
-        let output = Command::new("MOVE")
+        let output = Command::new("cmd")
+            .arg("/C")
+            .arg("MOVE")
             .arg(source)
             .arg(target)
             .stdout(Stdio::piped())
