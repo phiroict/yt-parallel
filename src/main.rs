@@ -43,6 +43,8 @@ fn move_to_nas(source: String, target: String) -> bool {
     
     let os_running = env::consts::OS;
     if os_running.eq( "windows") {
+        println!("Download complete, starting to move to NAS, according to OS: {os_running}" );
+        println!("Remove the partial failed downloads" );
         let _ = Command::new("cmd")
             .arg("/C")
             .arg("DEL")
@@ -52,6 +54,7 @@ fn move_to_nas(source: String, target: String) -> bool {
             .output()
             .expect("Could not delete the part remainders");
         // Move over to the shared folders for serving
+        println!("Do the actual move from {source} to {target}" );
         let output = Command::new("cmd")
             .arg("/C")
             .arg("MOVE")
@@ -71,6 +74,8 @@ fn move_to_nas(source: String, target: String) -> bool {
         }
     } else {
         // Clean up failed downloads
+        println!("Download complete, starting to move to NAS, according to OS: {os_running}" );
+        println!("Remove the partial failed downloads" );
         let _ = Command::new("rm")
             .arg("-f")
             .arg(format!("{source}/{target}/{}", "*.part"))
@@ -79,6 +84,7 @@ fn move_to_nas(source: String, target: String) -> bool {
             .output()
             .expect("Could not delete the part remainders");
         // Move over to the shared folders for serving
+        println!("Do the actual move" );
         let output = Command::new("mv")
             .arg(source)
             .arg(target)
@@ -192,13 +198,13 @@ fn main() -> io::Result<()> {
 
     // Rust has some useful constants baked in, one of them is the OS that holds the OS it is running on.
     let os_running = env::consts::OS;
-    println!("Download complete, starting to move to NAS, according to OS: {os_running}" );
+
     // Default when running linux, I run Arch by the way 😎
     let mut path_to_nas = "/home/phiro/mounts/Volume_1/youtube/";
     if os_running.eq("macos") {
         path_to_nas = "/Volumes/huge/media/youtube/";
     } else if os_running.eq("windows") {
-        path_to_nas = "M:/youtube/";
+        path_to_nas = "M:\\youtube\\";
     }
     // Using the MacOS/Linux move tool here, there are ways to do this in Rust but it is a bit
     // cumbersome and I did not feel like reinventing the mv statement.
