@@ -57,13 +57,16 @@ fn move_to_nas(source: String, target: String) -> bool {
         println!("Do the actual move from {source} to {target}" );
         let output = Command::new("cmd")
             .arg("/C")
-            .arg("MOVE")
-            .arg(source)
+            .arg("XCOPY")
+            .arg(source.clone())
             .arg(target)
+            .arg("/e")
+            .arg("/q")
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
-            .expect("Could not move to the NAS");
+            .expect("Could not copy to the NAS");
+        fs::remove_dir_all(source.clone()).expect("Could not delete the source files, delete them yourself.");
         // Print out errors and other feedback of the move
         println!("StOut: {:?}", String::from_utf8(output.stdout).unwrap());
         println!("StErr: {:?}", String::from_utf8(output.stderr).unwrap());
@@ -201,10 +204,11 @@ fn main() -> io::Result<()> {
 
     // Default when running linux, I run Arch by the way 😎
     let mut path_to_nas = "/home/phiro/mounts/Volume_1/youtube/";
+    let windows_path = ["M:\\youtube\\", &folder_name.clone() ,  "\\*"].join("");
     if os_running.eq("macos") {
         path_to_nas = "/Volumes/huge/media/youtube/";
     } else if os_running.eq("windows") {
-        path_to_nas = "M:\\youtube\\";
+        path_to_nas = &windows_path;
     }
     // Using the MacOS/Linux move tool here, there are ways to do this in Rust but it is a bit
     // cumbersome and I did not feel like reinventing the mv statement.
