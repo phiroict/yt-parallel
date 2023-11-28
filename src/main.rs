@@ -44,22 +44,31 @@ fn move_to_nas(source: String, target: String) -> bool {
     let os_running = env::consts::OS;
     if os_running.eq( "windows") {
         println!("Download complete, starting to move to NAS, according to OS: {os_running}" );
-        println!("Remove the partial failed downloads" );
+        println!("Remove the partial failed downloads from {source}" );
+        let target_wildcard = [target.clone(), "\\*".to_string()].join("");
         let _ = Command::new("cmd")
             .arg("/C")
             .arg("DEL")
-            .arg(format!("{target}/{}", "*.part"))
+            .arg(format!("{source}/{}", "*.part"))
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
             .expect("Could not delete the part remainders");
         // Move over to the shared folders for serving
-        println!("Do the actual move from {source} to {target}" );
+        println!("Do the actual move from {source} to {target_wildcard}" );
+        //Create the target dir as it is not created by the xcopy
+        let result = fs::create_dir(target.clone());
+        match result {
+            Ok(_) => {println!("Created target folder")}
+            Err(e) => {
+                println!("The folder creation failed, will attempt to continue {e}");
+            }
+        }
         let output = Command::new("cmd")
             .arg("/C")
             .arg("XCOPY")
             .arg(source.clone())
-            .arg(target)
+            .arg(target_wildcard.clone())
             .arg("/e")
             .arg("/q")
             .stdout(Stdio::piped())
@@ -204,7 +213,7 @@ fn main() -> io::Result<()> {
 
     // Default when running linux, I run Arch by the way 😎
     let mut path_to_nas = "/home/phiro/mounts/Volume_1/youtube/";
-    let windows_path = ["M:\\youtube\\", &folder_name.clone() ,  "\\*"].join("");
+    let windows_path = ["M:\\youtube",  "\\"].join("");
     if os_running.eq("macos") {
         path_to_nas = "/Volumes/huge/media/youtube/";
     } else if os_running.eq("windows") {
