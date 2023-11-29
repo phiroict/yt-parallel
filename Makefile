@@ -11,6 +11,8 @@ init:
 	cargo install --force cargo-outdated
 	cargo install --force cargo-update
 	cargo install --force cargo-semver-tool
+init_fedora:
+	sudo yum install gcc openssl openssl-devel yt-dlp -y 
 init_arch:
 	pacman -S which yt-dlp --needed
 init_mac:
