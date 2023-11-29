@@ -221,7 +221,7 @@ fn main() -> io::Result<()> {
     let os_running = env::consts::OS;
 
     // Default when running linux, I run Arch by the way 😎
-    let mut path_to_nas = "/home/phiro/mounts/Volume_1/youtube/";
+    let mut path_to_nas = "/home/phiro/";
     let windows_path = ["M:\\youtube", "\\"].join("");
     if os_running.eq("macos") {
         path_to_nas = "/Volumes/huge/media/youtube/";
