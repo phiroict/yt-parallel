@@ -1,12 +1,12 @@
 mod tests;
 
+use chrono::Local;
+use clap::Parser;
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::process::{Command, Stdio};
-use std::{env, fs, thread};
-use chrono::Local;
 use std::sync::mpsc::sync_channel;
-use clap::Parser;
+use std::{env, fs, thread};
 use which::which;
 
 #[derive(Parser, Debug)]
@@ -15,20 +15,23 @@ struct Args {
     /// Location of the videolist.txt file
     #[arg(short, long, default_value_t = String::from("./videolist.txt"))]
     location_video_list: String,
+    #[arg(short, long, default_value_t = String::from("yt-dlp"))]
+    video_download_tool: String,
 }
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Check downloader present,
 /// Checks whether the yt-dlp app is attainable in the path on the OS.
+/// # Parameters
+/// command [String]: The command that is the actual appication to download the yt file with.
 /// # Returns
 /// True when present, else false. Does not processes errors, it will return false on error.
-pub fn check_downloader_present() -> bool {
-    let command = "yt-dlp";
+pub fn check_downloader_present(command: String) -> bool {
     let is_present = which(command);
     match is_present {
-        Ok(_) => { true }
-        Err(_) => {false}
+        Ok(_) => true,
+        Err(_) => false,
     }
 }
 
@@ -40,11 +43,10 @@ pub fn check_downloader_present() -> bool {
 /// # Returns
 /// True on succesful move, else false, it will panic out when a system error occurs.
 fn move_to_nas(source: String, target: String) -> bool {
-    
     let os_running = env::consts::OS;
-    if os_running.eq( "windows") {
-        println!("Download complete, starting to move to NAS, according to OS: {os_running}" );
-        println!("Remove the partial failed downloads from {source}" );
+    if os_running.eq("windows") {
+        println!("Download complete, starting to move to NAS, according to OS: {os_running}");
+        println!("Remove the partial failed downloads from {source}");
         let target_wildcard = [target.clone(), "\\*".to_string()].join("");
         let _ = Command::new("cmd")
             .arg("/C")
@@ -55,11 +57,13 @@ fn move_to_nas(source: String, target: String) -> bool {
             .output()
             .expect("Could not delete the part remainders");
         // Move over to the shared folders for serving
-        println!("Do the actual move from {source} to {target_wildcard}" );
+        println!("Do the actual move from {source} to {target_wildcard}");
         //Create the target dir as it is not created by the xcopy
         let result = fs::create_dir(target.clone());
         match result {
-            Ok(_) => {println!("Created target folder")}
+            Ok(_) => {
+                println!("Created target folder")
+            }
             Err(e) => {
                 println!("The folder creation failed, will attempt to continue {e}");
             }
@@ -75,7 +79,8 @@ fn move_to_nas(source: String, target: String) -> bool {
             .stderr(Stdio::piped())
             .output()
             .expect("Could not copy to the NAS");
-        fs::remove_dir_all(source.clone()).expect("Could not delete the source files, delete them yourself.");
+        fs::remove_dir_all(source.clone())
+            .expect("Could not delete the source files, delete them yourself.");
         // Print out errors and other feedback of the move
         println!("StOut: {:?}", String::from_utf8(output.stdout).unwrap());
         println!("StErr: {:?}", String::from_utf8(output.stderr).unwrap());
@@ -86,8 +91,8 @@ fn move_to_nas(source: String, target: String) -> bool {
         }
     } else {
         // Clean up failed downloads
-        println!("Download complete, starting to move to NAS, according to OS: {os_running}" );
-        println!("Remove the partial failed downloads" );
+        println!("Download complete, starting to move to NAS, according to OS: {os_running}");
+        println!("Remove the partial failed downloads");
         let _ = Command::new("rm")
             .arg("-f")
             .arg(format!("{target}/{}", "*.part"))
@@ -96,7 +101,7 @@ fn move_to_nas(source: String, target: String) -> bool {
             .output()
             .expect("Could not delete the part remainders");
         // Move over to the shared folders for serving
-        println!("Do the actual move" );
+        println!("Do the actual move");
         let output = Command::new("mv")
             .arg(source)
             .arg(target)
@@ -112,26 +117,24 @@ fn move_to_nas(source: String, target: String) -> bool {
         } else {
             false
         }
-        
     }
-    
 }
-
 
 fn main() -> io::Result<()> {
     // Get arguments commandline
     let args = Args::parse();
     println!("File to parse: {}", args.location_video_list);
+    println!("Downloadtool to use: {}", args.video_download_tool);
     // Get the current version, this is baked into the application and can be extracted as a ENV var
 
     println!("Running version {}", VERSION);
-    let yt_downloader_is_present = check_downloader_present();
+    let yt_downloader_is_present = check_downloader_present(args.video_download_tool);
     if !yt_downloader_is_present {
         panic!("yt-dlp is not present, not possible to continue");
     }
     // Create a folder with the current datetime
     let datetime = Local::now();
-    let folder_name:String = datetime.format("%Y%m%d").to_string();
+    let folder_name: String = datetime.format("%Y%m%d").to_string();
     fs::create_dir(&folder_name)?;
 
     // Open the file, hardcoded here as it is part of te fixed setup.
@@ -156,7 +159,7 @@ fn main() -> io::Result<()> {
     let mut thread_pool = vec![];
     // Process the lines in the array, create a thread for each download
     for line in &lines {
-        let tx= tx.clone();
+        let tx = tx.clone();
         // Do something with each line
         println!("Processing {}", line);
         // We move the line into the thread, so we cannot use it anymore after that, so we make a
@@ -184,11 +187,17 @@ fn main() -> io::Result<()> {
                 .stdout(Stdio::piped())
                 .stderr(Stdio::piped())
                 .output()
-                .expect("Failed to execute yt-dlp command, you may need to (re)install it. \
-                Or make sure it is in PATH of this executable");
-            tx.send(format!("Downloaded {}", &cline)).expect("Could not sent message");
+                .expect(
+                    "Failed to execute yt-dlp command, you may need to (re)install it. \
+                Or make sure it is in PATH of this executable",
+                );
+            tx.send(format!("Downloaded {}", &cline))
+                .expect("Could not sent message");
         });
-        println!("Created thread {:?} for youtube url {line}", t.thread().id());
+        println!(
+            "Created thread {:?} for youtube url {line}",
+            t.thread().id()
+        );
         thread_pool.push(t);
     }
     // Need to drop the transmitter as otherwise the receiver never stops listening.
@@ -213,7 +222,7 @@ fn main() -> io::Result<()> {
 
     // Default when running linux, I run Arch by the way 😎
     let mut path_to_nas = "/home/phiro/mounts/Volume_1/youtube/";
-    let windows_path = ["M:\\youtube",  "\\"].join("");
+    let windows_path = ["M:\\youtube", "\\"].join("");
     if os_running.eq("macos") {
         path_to_nas = "/Volumes/huge/media/youtube/";
     } else if os_running.eq("windows") {
@@ -221,7 +230,10 @@ fn main() -> io::Result<()> {
     }
     // Using the MacOS/Linux move tool here, there are ways to do this in Rust but it is a bit
     // cumbersome and I did not feel like reinventing the mv statement.
-    let move_result = move_to_nas(folder_name.clone(), format!( "{}{}", path_to_nas, &folder_name));
+    let move_result = move_to_nas(
+        folder_name.clone(),
+        format!("{}{}", path_to_nas, &folder_name),
+    );
     if move_result {
         println!("Move complete")
     } else {
