@@ -25,10 +25,12 @@ run:
 	cargo run
 run_win:
 	cd target/debug && yt-parallel.exe -l "c:/Users/phiro/Desktop/videolist.txt"
-deploy: check
-	cargo semver bump patch && cargo build --release &&  sudo -S cp target/release/yt-parallel /usr/local/bin/ && git commit -am "Linux Release commit" && git tag v$(shell bash get_version_from_toml.sh)
-deploy_win: check
-	cargo semver bump patch && cargo build --release &&  cmd //C COPY "target/release/yt-parallel.exe" "I:/Apps/" && git commit -am "Windows Release commit" && git tag v$(shell bash get_version_from_toml.sh)
+version:
+	cargo semver bump patch && cargo build --release
+deploy: check version
+	 sudo -S cp target/release/yt-parallel /usr/local/bin/ && git commit -am "Linux Release commit" && git tag v$(shell bash get_version_from_toml.sh)
+deploy_win: check version
+	cmd /C  XCOPY target\release\yt-parallel.exe I:\Apps\ /y /q && git commit -am "Windows Release commit" && cmd /C python.exe get_version_from_toml.py
 build_container_arm:
 	docker build -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
 run_container_arm:
@@ -47,4 +49,3 @@ all_container_arm: build_linux_arm build_container_arm run_container_arm
 push_container:
 	docker push phiroict/yt-parallel:$(APP_VERSION)
 deploy_container: build_linux_arm build_container_arm push_container
-
