@@ -137,7 +137,7 @@ fn main() -> io::Result<()> {
     let folder_name: String = datetime.format("%Y%m%d").to_string();
     fs::create_dir(&folder_name)?;
 
-    // Open the file, hardcoded here as it is part of te fixed setup.
+    // Open the file, gets the name from the params or it takes the default.
     let file = File::open(args.location_video_list)?;
 
     // Create a vector to store the lines that consists of urls to a youtube (or other) clip.
@@ -193,7 +193,7 @@ fn main() -> io::Result<()> {
                 );
             tx.send(format!("Downloaded {}", &cline))
                 .expect("Could not sent message");
-        });
+        }); // End thread creation.
         println!(
             "Created thread {:?} for youtube url {line}",
             t.thread().id()
