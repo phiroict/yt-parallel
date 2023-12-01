@@ -130,21 +130,22 @@ fn move_to_nas(source: String, target: String) -> bool {
 }
 
 fn main() -> io::Result<()> {
+    // Get arguments commandline
     let args = Args::parse();
     initialize_logging(args.debug_level);
+    // Get the time measurements we use for reporing performance.
     let time_start = Local::now();
     let start_time = time_start.format("%Y-%m-%dT%H:%M:%S");
     info!("Starting the process at {start_time}");
-    // Get arguments commandline
-    
+
     info!("File to parse: {}", args.location_video_list);
-    info!("Downloadtool to use: {}", args.video_download_tool);
+    info!("Download tool to use: {}", args.video_download_tool);
     // Get the current version, this is baked into the application and can be extracted as a ENV var
 
     info!("Running version {}", VERSION);
     let yt_downloader_is_present = check_downloader_present(args.video_download_tool);
     if !yt_downloader_is_present {
-        error!("yt-dlp is not present, not possible to continue");
+        error!("{} is not present, not possible to continue",args.video_download_tool);
         exit(0x0002);
     }
     // Create a folder with the current datetime
@@ -158,7 +159,7 @@ fn main() -> io::Result<()> {
             debug!("Source folder created")
         }
         Err(e) => {
-            error!("Could not create the folder, it may already exist: {:?}", e)
+            warn!("Could not create the folder, it may already exist, will try to continue: {:?}", e)
         }
     }
 
@@ -203,6 +204,13 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
+/// Go to the list of urls from param `file` and place them into the folder from param `folder_name`
+/// and download them to that folder
+/// # Parameters
+/// file - Handle to a file that has the yt urls as a `\n` separated list.
+/// folder_name - The string that has the path of the directory to download to
+/// ## Return
+/// Nothing on ok, and an Error object on error.
 fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::error::Error>> {
     // Create a vector to store the lines that consists of urls to a youtube (or other) clip.
     let mut lines: Vec<String> = Vec::new();
@@ -265,12 +273,13 @@ fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::e
                 thread::current().id(),
                 &cline
             );
-            debug!(
+
+            trace!(
                 "Thread {:?} StOut: {:?}",
                 thread::current().id(),
                 String::from_utf8(output.stdout).unwrap()
             );
-            debug!(
+            trace!(
                 "Thread {:?} StErr: {:?}",
                 thread::current().id(),
                 String::from_utf8(output.stderr).unwrap()
