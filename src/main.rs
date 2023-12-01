@@ -151,8 +151,8 @@ fn main() -> io::Result<()> {
     debug!("About to create folder {}", &folder_name);
     let create_folder_result = fs::create_dir(&folder_name);
     match create_folder_result {
-        Ok(_) => {debug!("Source folder created")}
-        Err(e) => {error!("Could not create the folder, it may already exist: {:?}", e)}
+        Ok(_) => { debug!("Source folder created") }
+        Err(e) => { error!("Could not create the folder, it may already exist: {:?}", e) }
     }
 
 
@@ -162,7 +162,7 @@ fn main() -> io::Result<()> {
     match file {
         Ok(fs) => {
             info!("File found and opened");
-            let process_result = process_videos(&folder_name,fs);
+            let process_result = process_videos(&folder_name, fs);
             match process_result {
                 Ok(_) => {
                     info!("Processing video completed")
@@ -281,7 +281,6 @@ fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::e
             }
             Err(e) => {
                 error!("Could not join thread {:?} thread is terminated and consider download lost", e);
-
             }
         }
 
