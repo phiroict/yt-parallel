@@ -4,9 +4,9 @@ when running in parallel. Now this is use-case that works for me, so your milage
 In short: 
 An utility to run yt-dlp processes in parallel. There is little tool specific code here, just run 
 these downloads in parallel. 
-
+It is possible to use another download tool by passing it in the commandline for instance: `yt-parallel --video-download-tool your-tool-here`
 Note that there are a lot of local settings here that you need to adapt to your needs, check the 
-code comments for this. 
+code comments for this. There are a number of arguments you can pass. 
 
 ## Stack 
 
@@ -47,6 +47,8 @@ Options:
           Location of the videolist.txt file [default: ./videolist.txt]
   -v, --video-download-tool <VIDEO_DOWNLOAD_TOOL>
           [default: yt-dlp]
+  -d, --debug-level <DEBUG_LEVEL>
+          [default: Warn] Possible values: {'Error', 'Warn', 'Info', 'Debug', 'Trace'} note the casing.
   -h, --help
           Print help
   -V, --version

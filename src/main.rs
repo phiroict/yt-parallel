@@ -22,6 +22,8 @@ struct Args {
     video_download_tool: String,
     #[arg(short, long, default_value_t = String::from("Warn"))]
     debug_level: String,
+    #[arg(short, long, default_value_t = String::from(""))]
+    move_target: String,
 }
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -140,10 +142,11 @@ fn main() -> io::Result<()> {
 
     info!("File to parse: {}", args.location_video_list);
     info!("Download tool to use: {}", args.video_download_tool);
+    info!("Move target set to '{}', '' means none set", args.move_target);
     // Get the current version, this is baked into the application and can be extracted as a ENV var
 
     info!("Running version {}", VERSION);
-    let yt_downloader_is_present = check_downloader_present(args.video_download_tool);
+    let yt_downloader_is_present = check_downloader_present(args.video_download_tool.clone());
     if !yt_downloader_is_present {
         error!("{} is not present, not possible to continue",args.video_download_tool);
         exit(0x0002);
@@ -172,7 +175,7 @@ fn main() -> io::Result<()> {
     match file {
         Ok(fs) => {
             info!("File found and opened");
-            let process_result = process_videos(&folder_name, fs);
+            let process_result = process_videos(&folder_name, fs, args.move_target);
             match process_result {
                 Ok(_) => {
                     info!("Processing video completed")
@@ -211,7 +214,7 @@ fn main() -> io::Result<()> {
 /// folder_name - The string that has the path of the directory to download to
 /// ## Return
 /// Nothing on ok, and an Error object on error.
-fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::error::Error>> {
+fn process_videos(folder_name: &String, file: File, move_target: String) -> Result<(), Box<dyn std::error::Error>> {
     // Create a vector to store the lines that consists of urls to a youtube (or other) clip.
     let mut lines: Vec<String> = Vec::new();
 
@@ -339,15 +342,10 @@ fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::e
 
     // Default when running linux, I run Arch by the way 😎
     debug!("Set the path to linux path as default, other OS will overwrite, the current OS is {os_running}");
-    let mut path_to_nas = "/home/phiro/";
-    let windows_path = ["M:\\youtube", "\\"].join("");
-    if os_running.eq("macos") {
-        debug!("Set the path as set in macos overwriting the linux path");
-        path_to_nas = "/Volumes/huge/media/youtube/";
-    } else if os_running.eq("windows") {
-        debug!("Set the path as set in windows overwriting the linux path");
-        path_to_nas = &windows_path;
-    }
+
+
+    let path_to_nas = evaluate_move_path(os_running, move_target.clone());
+
     // Using the MacOS/Linux move tool here, there are ways to do this in Rust but it is a bit
     // cumbersome and I did not feel like reinventing the mv statement.
     debug!("Going into the move result function");
@@ -366,4 +364,28 @@ fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::e
     let move_time = move_time_end - move_time_start;
     info!("Move took {} time", move_time.to_string());
     Ok(())
+}
+
+fn evaluate_move_path(os_running: &str, path_to_nas: String)-> String {
+// If no path is set, get the defaults for the OSes.
+    let mut ret_val = String::from("");
+    if path_to_nas.clone().eq("") {
+
+        // Bit if a hack to format a standard windows path.
+
+        if os_running.eq("macos") {
+            debug!("Set the path as set in macos overwriting the linux path");
+            ret_val = String::from("/Volumes/huge/media/youtube/");
+        } else if os_running.eq("windows") {
+            debug!("Set the path as set in windows overwriting the linux path");
+            ret_val = String::from("M:/media/youtube/");
+
+        }
+        info!("There is no default path set for the move target, so we use the default: {ret_val}");
+    } else {
+        info!("Move path set for the move target by argument: {path_to_nas}");
+        ret_val = String::from(path_to_nas);
+    }
+    ret_val
+
 }
