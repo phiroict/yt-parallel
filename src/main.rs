@@ -7,7 +7,7 @@ use clap::Parser;
 use log::{debug, error, info, trace, warn};
 use std::fs::File;
 use std::io::{self, BufRead};
-use std::process::{Command, exit, Stdio};
+use std::process::{exit, Command, Stdio};
 use std::sync::mpsc::sync_channel;
 use std::{env, fs, thread};
 use which::which;
@@ -128,12 +128,13 @@ fn move_to_nas(source: String, target: String) -> bool {
 }
 
 fn main() -> io::Result<()> {
-    initialize_logging();
+    let args = Args::parse();
+    initialize_logging(args.debug_level);
     let time_start = Local::now();
     let start_time = time_start.format("%Y-%m-%dT%H:%M:%S");
     info!("Starting the process at {start_time}");
     // Get arguments commandline
-    let args = Args::parse();
+
     info!("File to parse: {}", args.location_video_list);
     info!("Downloadtool to use: {}", args.video_download_tool);
     // Get the current version, this is baked into the application and can be extracted as a ENV var
@@ -151,13 +152,15 @@ fn main() -> io::Result<()> {
     debug!("About to create folder {}", &folder_name);
     let create_folder_result = fs::create_dir(&folder_name);
     match create_folder_result {
-        Ok(_) => { debug!("Source folder created") }
-        Err(e) => { error!("Could not create the folder, it may already exist: {:?}", e) }
+        Ok(_) => {debug!("Source folder created")}
+        Err(e) => {error!("Could not create the folder, it may already exist: {:?}", e)}
     }
 
-
     // Open the file, gets the name from the params or it takes the default.
-    debug!("Opening the video location file at {}", args.location_video_list);
+    debug!(
+        "Opening the video location file at {}",
+        args.location_video_list
+    );
     let file = File::open(args.location_video_list.clone());
     match file {
         Ok(fs) => {
@@ -174,11 +177,13 @@ fn main() -> io::Result<()> {
             }
         }
         Err(e) => {
-            error!("Could not find the videolist at {} for reason {:?}, leaving", args.location_video_list, e);
+            error!(
+                "Could not find the videolist at {} for reason {:?}, leaving",
+                args.location_video_list, e
+            );
             exit(0x0001);
         }
     }
-
 
     trace!("Getting the end time");
     let time_end = Local::now();
@@ -193,7 +198,7 @@ fn main() -> io::Result<()> {
 }
 
 fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::error::Error>> {
-// Create a vector to store the lines that consists of urls to a youtube (or other) clip.
+    // Create a vector to store the lines that consists of urls to a youtube (or other) clip.
     let mut lines: Vec<String> = Vec::new();
 
     // Read the file line by line
@@ -226,7 +231,11 @@ fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::e
             // sponsor-blocks as they are repetitive and most of the time not even relevant
             // I am not using the output in normal use, so I prepend it with a "_". For debugging
             // it can be useful. The in and output are buffered
-            debug!("I am in thread {:?} starting downloading {}", thread::current().id(), &cline);
+            debug!(
+                "I am in thread {:?} starting downloading {}",
+                thread::current().id(),
+                &cline
+            );
             let output = Command::new(format!("yt-dlp"))
                 .arg("--sponsorblock-remove")
                 .arg("default")
@@ -245,13 +254,31 @@ fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::e
                     "Failed to execute yt-dlp command, you may need to (re)install it. \
                 Or make sure it is in PATH of this executable",
                 );
-            debug!("I am in thread {:?} completed downloading {}", thread::current().id(), &cline);
-            debug!("Thread {:?} StOut: {:?}",thread::current().id(),  String::from_utf8(output.stdout).unwrap());
-            debug!("Thread {:?} StErr: {:?}" ,thread::current().id(),  String::from_utf8(output.stderr).unwrap());
-            trace!("About the sent message to main thread from thread {:?}", thread::current().id());
+            debug!(
+                "I am in thread {:?} completed downloading {}",
+                thread::current().id(),
+                &cline
+            );
+            debug!(
+                "Thread {:?} StOut: {:?}",
+                thread::current().id(),
+                String::from_utf8(output.stdout).unwrap()
+            );
+            debug!(
+                "Thread {:?} StErr: {:?}",
+                thread::current().id(),
+                String::from_utf8(output.stderr).unwrap()
+            );
+            trace!(
+                "About the sent message to main thread from thread {:?}",
+                thread::current().id()
+            );
             tx.send(format!("Downloaded {}", &cline))
                 .expect("Could not sent message");
-            trace!("Message to main thread from thread {:?} sent", thread::current().id());
+            trace!(
+                "Message to main thread from thread {:?} sent",
+                thread::current().id()
+            );
         });
         // End thread creation.
         info!(
@@ -274,13 +301,14 @@ fn process_videos(folder_name: &String, file: File) -> Result<(), Box<dyn std::e
     for t in thread_pool {
         let current_thread = t.thread().id().clone();
         trace!("About the join thread {:?}", t.thread().id().clone());
-        let join_result = t.join();  //After join the t variable is moved and cannot be referenced again.
+        let join_result = t.join(); //After join the t variable is moved and cannot be referenced again.
         match join_result {
             Ok(jr) => {
                 debug!("Join of thread {:?} has succeeded", jr);
             }
             Err(e) => {
                 error!("Could not join thread {:?} thread is terminated and consider download lost", e);
+
             }
         }
 

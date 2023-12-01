@@ -19,7 +19,9 @@ init_mac:
 	brew install yt-dlp
 check:
 	cargo audit --ignore RUSTSEC-2020-0071 && cargo update && cargo outdated
-build: check
+test:
+	cargo test
+build: check test
 	cargo build
 run:
 	cargo run
@@ -27,9 +29,9 @@ run_win:
 	cd target/debug && yt-parallel.exe -l "c:/Users/phiro/Desktop/videolist.txt"
 version:
 	cargo semver bump patch && cargo build --release
-deploy: check version
+deploy: check test version
 	 sudo -S cp target/release/yt-parallel /usr/local/bin/ && git commit -am "Linux Release commit" && git tag v$(shell bash get_version_from_toml.sh)
-deploy_win: check version
+deploy_win: check test version
 	cmd /C  XCOPY target\release\yt-parallel.exe I:\Apps\ /y /q && git commit -am "Windows Release commit" && cmd /C python.exe get_version_from_toml.py
 build_container_arm:
 	docker build -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
