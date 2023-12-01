@@ -48,7 +48,9 @@ Options:
   -v, --video-download-tool <VIDEO_DOWNLOAD_TOOL>
           [default: yt-dlp]
   -d, --debug-level <DEBUG_LEVEL>
-          [default: Warn] Possible values: {'Error', 'Warn', 'Info', 'Debug', 'Trace'} note the casing.
+          [default: info] [possible values: trace, debug, info, warn, error]
+  -m, --move-target <MOVE_TARGET>
+          [default: ]
   -h, --help
           Print help
   -V, --version
