@@ -12,7 +12,27 @@ use std::sync::mpsc::sync_channel;
 use std::{env, fs, thread};
 use which::which;
 
-#[derive(Parser, Debug)]
+#[derive(clap::ValueEnum, Clone)]
+enum LogLevel {
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error,
+}
+
+fn get_string_from_loglevel(val: LogLevel) -> String {
+    let ret_val = match val {
+        LogLevel::Trace => "Trace",
+        LogLevel::Debug => "Debug",
+        LogLevel::Info => "Info",
+        LogLevel::Warn => "Warn",
+        LogLevel::Error => "Error",
+    };
+    String::from(ret_val)
+}
+
+#[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Location of the videolist.txt file
@@ -20,8 +40,8 @@ struct Args {
     location_video_list: String,
     #[arg(short, long, default_value_t = String::from("yt-dlp"))]
     video_download_tool: String,
-    #[arg(short, long, default_value_t = String::from("Warn"))]
-    debug_level: String,
+    #[arg(value_enum, short, long, default_value_t = LogLevel::Info)]
+    debug_level: LogLevel,
     #[arg(short, long, default_value_t = String::from(""))]
     move_target: String,
 }
@@ -134,7 +154,7 @@ fn move_to_nas(source: String, target: String) -> bool {
 fn main() -> io::Result<()> {
     // Get arguments commandline
     let args = Args::parse();
-    initialize_logging(args.debug_level);
+    initialize_logging(get_string_from_loglevel(args.debug_level));
     // Get the time measurements we use for reporing performance.
     let time_start = Local::now();
     let start_time = time_start.format("%Y-%m-%dT%H:%M:%S");
@@ -142,13 +162,19 @@ fn main() -> io::Result<()> {
 
     info!("File to parse: {}", args.location_video_list);
     info!("Download tool to use: {}", args.video_download_tool);
-    info!("Move target set to '{}', '' means none set", args.move_target);
+    info!(
+        "Move target set to '{}', '' means none set",
+        args.move_target
+    );
     // Get the current version, this is baked into the application and can be extracted as a ENV var
 
     info!("Running version {}", VERSION);
     let yt_downloader_is_present = check_downloader_present(args.video_download_tool.clone());
     if !yt_downloader_is_present {
-        error!("{} is not present, not possible to continue",args.video_download_tool);
+        error!(
+            "{} is not present, not possible to continue",
+            args.video_download_tool
+        );
         exit(0x0002);
     }
     // Create a folder with the current datetime
@@ -162,7 +188,10 @@ fn main() -> io::Result<()> {
             debug!("Source folder created")
         }
         Err(e) => {
-            warn!("Could not create the folder, it may already exist, will try to continue: {:?}", e)
+            warn!(
+                "Could not create the folder, it may already exist, will try to continue: {:?}",
+                e
+            )
         }
     }
 
@@ -214,7 +243,11 @@ fn main() -> io::Result<()> {
 /// folder_name - The string that has the path of the directory to download to
 /// ## Return
 /// Nothing on ok, and an Error object on error.
-fn process_videos(folder_name: &String, file: File, move_target: String) -> Result<(), Box<dyn std::error::Error>> {
+fn process_videos(
+    folder_name: &String,
+    file: File,
+    move_target: String,
+) -> Result<(), Box<dyn std::error::Error>> {
     // Create a vector to store the lines that consists of urls to a youtube (or other) clip.
     let mut lines: Vec<String> = Vec::new();
 
@@ -343,7 +376,6 @@ fn process_videos(folder_name: &String, file: File, move_target: String) -> Resu
     // Default when running linux, I run Arch by the way 😎
     debug!("Set the path to linux path as default, other OS will overwrite, the current OS is {os_running}");
 
-
     let path_to_nas = evaluate_move_path(os_running, move_target.clone());
 
     // Using the MacOS/Linux move tool here, there are ways to do this in Rust but it is a bit
@@ -366,11 +398,10 @@ fn process_videos(folder_name: &String, file: File, move_target: String) -> Resu
     Ok(())
 }
 
-fn evaluate_move_path(os_running: &str, path_to_nas: String)-> String {
-// If no path is set, get the defaults for the OSes.
+fn evaluate_move_path(os_running: &str, path_to_nas: String) -> String {
+    // If no path is set, get the defaults for the OSes.
     let mut ret_val = String::from("");
     if path_to_nas.clone().eq("") {
-
         // Bit if a hack to format a standard windows path.
 
         if os_running.eq("macos") {
@@ -379,7 +410,6 @@ fn evaluate_move_path(os_running: &str, path_to_nas: String)-> String {
         } else if os_running.eq("windows") {
             debug!("Set the path as set in windows overwriting the linux path");
             ret_val = String::from("M:/media/youtube/");
-
         }
         info!("There is no default path set for the move target, so we use the default: {ret_val}");
     } else {
@@ -387,5 +417,4 @@ fn evaluate_move_path(os_running: &str, path_to_nas: String)-> String {
         ret_val = String::from(path_to_nas);
     }
     ret_val
-
 }

@@ -3,7 +3,6 @@ mod tests {
     use crate::{check_downloader_present, evaluate_move_path, move_to_nas};
     use std::fs;
 
-
     #[test]
     fn app_present() {
         let result = check_downloader_present("yt-dlp".to_string());
@@ -42,26 +41,26 @@ mod tests {
     }
 
     #[test]
-    fn move_path_evaluation_pass_path(){
+    fn move_path_evaluation_pass_path() {
         let test_target = "/usr/local/bin/test";
         let os_type = "windows";
         let result_path = evaluate_move_path(os_type, test_target.to_string());
-        assert_eq!(test_target , result_path);
+        assert_eq!(test_target, result_path);
     }
 
     #[test]
-    fn move_path_evaluation_no_path_os_windows(){
+    fn move_path_evaluation_no_path_os_windows() {
         let test_target = "";
         let os_type = "windows";
         let result_path = evaluate_move_path(os_type, test_target.to_string());
-        assert_eq!("M:/media/youtube/" , result_path);
+        assert_eq!("M:/media/youtube/", result_path);
     }
 
     #[test]
-    fn move_path_evaluation_no_path_os_macos(){
+    fn move_path_evaluation_no_path_os_macos() {
         let test_target = "";
         let os_type = "macos";
         let result_path = evaluate_move_path(os_type, test_target.to_string());
-        assert_eq!("/Volumes/huge/media/youtube/" , result_path);
+        assert_eq!("/Volumes/huge/media/youtube/", result_path);
     }
 }
