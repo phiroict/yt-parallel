@@ -231,7 +231,7 @@ fn main() -> io::Result<()> {
 
     info!(
         "Process concluded at {end_time} while started at {start_time} it took {} seconds",
-        time_passed.to_string()
+        time_passed.num_seconds()
     );
     Ok(())
 }
@@ -242,7 +242,7 @@ fn main() -> io::Result<()> {
 /// file - Handle to a file that has the yt urls as a `\n` separated list.
 /// folder_name - The string that has the path of the directory to download to
 /// ## Return
-/// Nothing on ok, and an Error object on error.
+/// Nothing on ok, and a generic Error object on error.
 fn process_videos(
     folder_name: &String,
     file: File,
