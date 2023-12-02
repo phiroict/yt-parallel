@@ -676,7 +676,7 @@ checksum = "dff9641d1cd4be8d1a070daf9e3773c5f67e78b4d9d42263020c057706765c04"
 
 [[package]]
 name = "yt-parallel"
-version = "0.4.5"
+version = "0.4.6"
 dependencies = [
  "chrono",
  "clap",
