@@ -394,7 +394,7 @@ fn process_videos(
     }
     let move_time_end = Local::now();
     let move_time = move_time_end - move_time_start;
-    info!("Move took {} time", move_time.to_string());
+    info!("Move took {} time", move_time.num_seconds());
     Ok(())
 }
 
