@@ -12,7 +12,7 @@ init:
 	cargo install --force cargo-update
 	cargo install --force cargo-semver-tool
 init_fedora:
-	sudo yum install gcc openssl openssl-devel yt-dlp -y 
+	sudo yum install gcc openssl openssl-devel yt-dlp python-pip -y 
 init_arch:
 	pacman -S which yt-dlp --needed
 init_mac:
@@ -35,6 +35,9 @@ deploy_win: check test version
 	cmd /C  XCOPY target\release\yt-parallel.exe I:\Apps\ /y /q && git commit -am "Windows Release commit" && cmd /C python.exe get_version_from_toml.py
 build_container_arm:
 	docker build -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
+build_container_fedora_arm:
+	podman build -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
+
 run_container_arm:
 	-docker rm yt-parallel
 	docker run \

@@ -1,13 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use crate::{check_downloader_present, move_to_nas};
+    use crate::{check_downloader_present, evaluate_move_path, move_to_nas};
     use std::fs;
-
-    #[test]
-    fn testion() {
-        let result = 2;
-        assert_eq!(result, 2);
-    }
 
     #[test]
     fn app_present() {
@@ -15,6 +9,11 @@ mod tests {
         assert!(result);
     }
 
+    #[test]
+    fn app_not_present() {
+        let result = check_downloader_present("IAmNotThere".to_string());
+        assert!(!result);
+    }
     #[test]
     fn move_tester() {
         use std::env;
@@ -39,5 +38,29 @@ mod tests {
         assert!(Path::new(&format!("{target_dir}/{source_file}")).exists());
         //Cleanup
         fs::remove_dir_all(target_dir.clone()).expect("Could note remove the target dir");
+    }
+
+    #[test]
+    fn move_path_evaluation_pass_path() {
+        let test_target = "/usr/local/bin/test";
+        let os_type = "windows";
+        let result_path = evaluate_move_path(os_type, test_target.to_string());
+        assert_eq!(test_target, result_path);
+    }
+
+    #[test]
+    fn move_path_evaluation_no_path_os_windows() {
+        let test_target = "";
+        let os_type = "windows";
+        let result_path = evaluate_move_path(os_type, test_target.to_string());
+        assert_eq!("M:/media/youtube/", result_path);
+    }
+
+    #[test]
+    fn move_path_evaluation_no_path_os_macos() {
+        let test_target = "";
+        let os_type = "macos";
+        let result_path = evaluate_move_path(os_type, test_target.to_string());
+        assert_eq!("/Volumes/huge/media/youtube/", result_path);
     }
 }
