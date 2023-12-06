@@ -90,7 +90,7 @@ fn move_to_nas(source: String, target: String) -> bool {
         info!("Do the actual move from {source} to {target_wildcard} in windows this is an XCOPY with a delete source dir at the end");
         //Create the target dir as it is not created by the xcopy
         debug!("Creating target directory {}", target.clone());
-        let result = fs::create_dir(target.clone());
+        let result = fs::create_dir_all(target.clone());
         match result {
             Ok(_) => {
                 info!("Created target folder")
@@ -117,7 +117,7 @@ fn move_to_nas(source: String, target: String) -> bool {
         if output.status.success() {
             // Only delete the source when successfully completed.
             fs::remove_dir_all(source.clone())
-                .expect("Could not delete the source files, delete them yourself.");
+                .expect(&*format!("Could not delete the source files at {source}, delete them yourself."));
             true
         } else {
             false
