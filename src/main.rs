@@ -110,12 +110,14 @@ fn move_to_nas(source: String, target: String) -> bool {
             .stderr(Stdio::piped())
             .output()
             .expect("Could not copy to the NAS");
-        fs::remove_dir_all(source.clone())
-            .expect("Could not delete the source files, delete them yourself.");
+
         // Print out errors and other feedback of the move
         info!("StOut: {:?}", String::from_utf8(output.stdout).unwrap());
         info!("StErr: {:?}", String::from_utf8(output.stderr).unwrap());
         if output.status.success() {
+            // Only delete the source when successfully completed.
+            fs::remove_dir_all(source.clone())
+                .expect("Could not delete the source files, delete them yourself.");
             true
         } else {
             false
