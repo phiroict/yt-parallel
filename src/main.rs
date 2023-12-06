@@ -76,7 +76,7 @@ fn move_to_nas(source: String, target: String) -> bool {
     if os_running.eq("windows") {
         info!("Download complete, starting to move to NAS, according to OS: {os_running}");
         info!("Remove the partial failed downloads from {source}");
-        let target_wildcard = [target.clone(), "\\*".to_string()].join("");
+        let target_wildcard = target.clone();
         debug!("About to run the del command deleting the partial files left `cmd /C DEL {source}*.part`");
         let _ = Command::new("cmd")
             .arg("/C")

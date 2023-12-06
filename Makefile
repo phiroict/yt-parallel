@@ -18,7 +18,7 @@ init_arch:
 init_mac:
 	brew install yt-dlp
 check:
-	cargo audit --ignore RUSTSEC-2020-0071 && cargo update && cargo outdated
+	cargo audit && cargo update && cargo outdated
 test:
 	cargo test
 build: check test
@@ -26,7 +26,7 @@ build: check test
 run:
 	cargo run
 run_win:
-	cd target/debug && yt-parallel.exe -l "c:/Users/phiro/Desktop/videolist.txt"
+	cd target/debug && yt-parallel.exe -l "I:/Apps/videolist.txt"
 version:
 	cargo semver bump patch && cargo build --release
 deploy: check test version
