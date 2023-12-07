@@ -366,7 +366,7 @@ fn evaluate_move_path(os_running: &str, path_to_nas: String) -> String {
             ret_val = String::from("/Volumes/huge/media/youtube/");
         } else if os_running.eq("windows") {
             debug!("Set the path as set in windows overwriting the linux path");
-            ret_val = String::from("M:/media/youtube/");
+            ret_val = String::from("M:/youtube/");
         }
         info!("There is no default path set for the move target, so we use the default: {ret_val}");
     } else {
