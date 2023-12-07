@@ -77,7 +77,7 @@ fn move_to_nas(source: String, target: String) -> bool {
         info!("Download complete, starting to move to NAS, according to OS: {os_running}");
         info!("Remove the partial failed downloads from {source}");
         let target_wildcard = target.clone();
-        debug!("About to run the del command deleting the partial files left `cmd /C DEL {source}*.part`");
+        debug!("About to run the del command deleting the partial files left `cmd /C DEL {}*.part`", source.clone());
         let _ = Command::new("cmd")
             .arg("/C")
             .arg("DEL")
@@ -99,6 +99,9 @@ fn move_to_nas(source: String, target: String) -> bool {
                 warn!("The folder creation failed, will attempt to continue {e}");
             }
         }
+
+        debug!( "About to call the command 'cmd /C XCOPY {} {} /e/ q'", source.clone(), target_wildcard.clone());
+
         let output = Command::new("cmd")
             .arg("/C")
             .arg("XCOPY")
