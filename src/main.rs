@@ -341,7 +341,7 @@ fn process_videos(
     let move_time_start = Local::now();
     let move_result = move_to_nas(
         folder_name.clone(),
-        format!("{}{}", path_to_nas, &folder_name),
+        format!("{}", path_to_nas),
     );
     trace!("Evaluating result move {:?}", move_result);
     if move_result {
