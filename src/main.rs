@@ -79,6 +79,7 @@ fn move_to_nas(source: String, target: String) -> bool {
 
     if source_path.exists()  {
         if !target_path.exists(){
+            debug!("Target {} did not exist, creating it", target.clone());
             let target_dir_result = fs::create_dir_all(target_path);
             match target_dir_result {
                 Ok(_) => {
