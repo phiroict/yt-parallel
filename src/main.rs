@@ -11,6 +11,8 @@ use std::process::{exit, Command, Stdio};
 use std::sync::mpsc::sync_channel;
 use std::{env, fs, thread};
 use which::which;
+use std::path::Path;
+use fs_extra::move_items;
 
 #[derive(clap::ValueEnum, Clone)]
 enum LogLevel {
@@ -70,89 +72,38 @@ pub fn check_downloader_present(command: String) -> bool {
 /// # Returns
 /// True on succesful move, else false, it will panic out when a system error occurs.
 fn move_to_nas(source: String, target: String) -> bool {
-    debug!("Entered the move_nas function");
-    let os_running = env::consts::OS;
-    debug!("OS is {os_running} branche");
-    if os_running.eq("windows") {
-        info!("Download complete, starting to move to NAS, according to OS: {os_running}");
-        info!("Remove the partial failed downloads from {source}");
-        let target_wildcard = target.clone();
-        debug!("About to run the del command deleting the partial files left `cmd /C DEL {}*.part`", source.clone());
-        let _ = Command::new("cmd")
-            .arg("/C")
-            .arg("DEL")
-            .arg(format!("{source}/{}", "*.part"))
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
-            .expect("Could not delete the part remainders");
-        // Move over to the shared folders for serving
-        info!("Do the actual move from {source} to {target_wildcard} in windows this is an XCOPY with a delete source dir at the end");
-        //Create the target dir as it is not created by the xcopy
-        debug!("Creating target directory {}", target.clone());
-        let result = fs::create_dir_all(target.clone());
-        match result {
+    debug!("Entered the move_nas function, moving from {} to {}", source.clone(), target.clone());
+
+    let source_path = Path::new(&source);
+    let target_path = Path::new(&target);
+
+    if source_path.exists()  {
+        if !target_path.exists(){
+            let target_dir_result = fs::create_dir_all(target_path);
+            match target_dir_result {
+                Ok(_) => {
+                    debug!("Target created: {}", target.clone())
+                }
+                Err(e) => {
+                    warn!("Could not create {} for reason: {}", target.clone(), e.to_string() )
+                }
+            }
+        }
+        let options = fs_extra::dir::CopyOptions::new();
+        let move_result = move_items(&[source_path], &target_path, &options);
+        match move_result {
             Ok(_) => {
-                info!("Created target folder")
+                info!("Move complete from {} to {}", source.clone(), target.clone());
+                true
             }
             Err(e) => {
-                warn!("The folder creation failed, will attempt to continue {e}");
+                error!("Could not move {} from {} because of {}", source.clone(), target.clone(), e.to_string());
+                false
             }
         }
-
-        debug!( "About to call the command 'cmd /C XCOPY {} {} /e/ q'", source.clone(), target_wildcard.clone());
-
-        let output = Command::new("cmd")
-            .arg("/C")
-            .arg("XCOPY")
-            .arg(source.clone())
-            .arg(target_wildcard.clone())
-            .arg("/e")
-            .arg("/q")
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
-            .expect("Could not copy to the NAS");
-
-        // Print out errors and other feedback of the move
-        info!("StOut: {:?}", String::from_utf8(output.stdout).unwrap());
-        info!("StErr: {:?}", String::from_utf8(output.stderr).unwrap());
-        if output.status.success() {
-            // Only delete the source when successfully completed.
-            fs::remove_dir_all(source.clone())
-                .expect(&*format!("Could not delete the source files at {source}, delete them yourself."));
-            true
-        } else {
-            false
-        }
     } else {
-        // Clean up failed downloads
-        info!("Download complete, starting to move to NAS, according to OS: {os_running}");
-        info!("Remove the partial failed downloads");
-        let _ = Command::new("rm")
-            .arg("-f")
-            .arg(format!("{target}/{}", "*.part"))
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
-            .expect("Could not delete the part remainders");
-        // Move over to the shared folders for serving
-        info!("Do the actual move");
-        let output = Command::new("mv")
-            .arg(source)
-            .arg(target)
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
-            .expect("Could not move to the NAS");
-        // Print out errors and other feedback of the move
-        info!("StOut: {:?}", String::from_utf8(output.stdout).unwrap());
-        info!("StErr: {:?}", String::from_utf8(output.stderr).unwrap());
-        if output.status.success() {
-            true
-        } else {
-            false
-        }
+        warn!("Either source or target directory does not exist or has no access. Source exist:{}, Target exist: {}", source_path.exists(), target_path.exists());
+        false
     }
 }
 
