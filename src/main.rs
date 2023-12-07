@@ -90,6 +90,19 @@ fn move_to_nas(source: String, target: String) -> bool {
                 }
             }
         }
+        //Remove part files
+        debug!("Prune partially failed downloads if any");
+        let files = fs::read_dir(Path::new(&source_path)).unwrap();
+        for x in files {
+            let name = x.unwrap().path().display().to_string();
+            debug!("Processing file {}", name);
+            if name.ends_with("part"){
+                info!("Found file in dir {}, removing file {}", source.clone(),name);
+                fs::remove_file(Path::new(&format!("{}",  name))).unwrap();
+            }
+        }
+        debug!("Completed pruning partial files");
+        //let source_files = fs::read_dir(source_path);
         let options = fs_extra::dir::CopyOptions::new();
         let move_result = move_items(&[source_path], &target_path, &options);
         match move_result {
