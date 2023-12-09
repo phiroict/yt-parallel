@@ -2,17 +2,17 @@ mod logging;
 mod tests;
 
 use crate::logging::initialize_logging;
-use chrono::Local;
+use chrono::{Duration, Local};
 use clap::Parser;
+use fs_extra::move_items;
 use log::{debug, error, info, trace, warn};
 use std::fs::File;
 use std::io::{self, BufRead};
+use std::path::Path;
 use std::process::{exit, Command, Stdio};
 use std::sync::mpsc::sync_channel;
 use std::{env, fs, thread};
 use which::which;
-use std::path::Path;
-use fs_extra::move_items;
 
 #[derive(clap::ValueEnum, Clone)]
 enum LogLevel {
@@ -72,13 +72,17 @@ pub fn check_downloader_present(command: String) -> bool {
 /// # Returns
 /// True on succesful move, else false, it will panic out when a system error occurs.
 fn move_to_nas(source: String, target: String) -> bool {
-    debug!("Entered the move_nas function, moving from {} to {}", source.clone(), target.clone());
+    debug!(
+        "Entered the move_nas function, moving from {} to {}",
+        source.clone(),
+        target.clone()
+    );
 
     let source_path = Path::new(&source);
     let target_path = Path::new(&target);
 
-    if source_path.exists()  {
-        if !target_path.exists(){
+    if source_path.exists() {
+        if !target_path.exists() {
             debug!("Target {} did not exist, creating it", target.clone());
             let target_dir_result = fs::create_dir_all(target_path);
             match target_dir_result {
@@ -86,7 +90,11 @@ fn move_to_nas(source: String, target: String) -> bool {
                     debug!("Target created: {}", target.clone())
                 }
                 Err(e) => {
-                    warn!("Could not create {} for reason: {}", target.clone(), e.to_string() )
+                    warn!(
+                        "Could not create {} for reason: {}",
+                        target.clone(),
+                        e.to_string()
+                    )
                 }
             }
         }
@@ -99,11 +107,20 @@ fn move_to_nas(source: String, target: String) -> bool {
         let move_result = move_items(&[source_path], &target_path, &options);
         match move_result {
             Ok(_) => {
-                info!("Move complete from {} to {}", source.clone(), target.clone());
+                info!(
+                    "Move complete from {} to {}",
+                    source.clone(),
+                    target.clone()
+                );
                 true
             }
             Err(e) => {
-                error!("Could not move {} from {} because of {}", source.clone(), target.clone(), e.to_string());
+                error!(
+                    "Could not move {} from {} because of {}",
+                    source.clone(),
+                    target.clone(),
+                    e.to_string()
+                );
                 false
             }
         }
@@ -119,10 +136,21 @@ fn prune_partial_files(source: &String, source_path: &&Path) {
         let name = x.unwrap().path().display().to_string();
         debug!("Processing file {}", name);
         if name.ends_with("part") {
-            info!("Found file in dir {}, removing file {}", source.clone(),name);
+            info!(
+                "Found file in dir {}, removing file {}",
+                source.clone(),
+                name
+            );
             fs::remove_file(Path::new(&format!("{}", name))).unwrap();
         }
     }
+}
+
+fn render_duration_readable(duration: Duration) -> String {
+    let hours = format!("{:0>2}",duration.num_hours());
+    let minutes = format!("{:0>2}",duration.num_minutes() % 60);
+    let seconds = format!("{:0>2}",duration.num_seconds() % 60);
+    return format!("{}:{}:{}", hours, minutes, seconds);
 }
 
 fn main() -> io::Result<()> {
@@ -204,11 +232,16 @@ fn main() -> io::Result<()> {
     let time_passed = time_end - time_start;
 
     info!(
-        "Process concluded at {end_time} while started at {start_time} it took {} seconds",
-        time_passed.num_seconds()
+        "Process concluded at {end_time} while started at {start_time} it took {} hours",
+         render_duration_readable(time_passed) ,
+
     );
     Ok(())
 }
+
+
+
+
 
 /// Go to the list of urls from param `file` and place them into the folder from param `folder_name`
 /// and download them to that folder
@@ -356,10 +389,7 @@ fn process_videos(
     // cumbersome and I did not feel like reinventing the mv statement.
     debug!("Going into the move result function");
     let move_time_start = Local::now();
-    let move_result = move_to_nas(
-        folder_name.clone(),
-        format!("{}", path_to_nas),
-    );
+    let move_result = move_to_nas(folder_name.clone(), format!("{}", path_to_nas));
     trace!("Evaluating result move {:?}", move_result);
     if move_result {
         info!("Move complete")
@@ -368,7 +398,7 @@ fn process_videos(
     }
     let move_time_end = Local::now();
     let move_time = move_time_end - move_time_start;
-    info!("Move took {} time", move_time.num_seconds());
+    info!("Move took {} minutes", render_duration_readable(move_time));
     Ok(())
 }
 
