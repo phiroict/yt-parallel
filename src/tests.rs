@@ -1,8 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use crate::{check_downloader_present, evaluate_move_path, move_to_nas};
-    use std::fs;
     use crate::logging::initialize_logging;
+    use crate::{check_downloader_present, evaluate_move_path, move_to_nas, render_duration_readable};
+    use std::fs;
+    use chrono::Duration;
 
     #[test]
     fn app_present() {
@@ -38,7 +39,10 @@ mod tests {
         fs::remove_dir_all(target_dir.clone()).expect("Could note remove the target dir");
         //Process assertions, note that we do the cleanup first and then handle the results as a failed assert will stop the teardown to run.
         assert!(dir_exists, "Target directory was not created");
-        assert!(file_exists, "Target file in the target directory was not createed");
+        assert!(
+            file_exists,
+            "Target file in the target directory was not createed"
+        );
     }
 
     #[test]
@@ -77,21 +81,26 @@ mod tests {
         let target_dir: String = "test_target_fs_extra".to_string();
 
         //Create source dir
-        let create_dir_result  = fs::create_dir(source_dir.clone());
-        match  create_dir_result{
+        let create_dir_result = fs::create_dir(source_dir.clone());
+        match create_dir_result {
             Ok(_) => {}
-            Err(e) => {println!("Create folder failed, may already exist: {}", e.to_string())}
+            Err(e) => {
+                println!("Create folder failed, may already exist: {}", e.to_string())
+            }
         }
         //Put a file in the source dir
-        let file_create_result = File::create(format!("{}/{source_file}", source_dir.clone()))
-            ;
+        let file_create_result = File::create(format!("{}/{source_file}", source_dir.clone()));
         match file_create_result {
             Ok(_) => {}
-            Err(e) => {println!("Create file failed, continue as it may already exist: {}", e.to_string())}
+            Err(e) => {
+                println!(
+                    "Create file failed, continue as it may already exist: {}",
+                    e.to_string()
+                )
+            }
         }
         //Do move
         let options = fs_extra::dir::CopyOptions::new();
-
 
         println!("Moving {} to {}", source_dir.clone(), target_dir.clone());
         let demo_source = Path::new(&source_dir);
@@ -122,7 +131,7 @@ mod tests {
     }
 
     #[test]
-    fn get_part_files_and_delete_them(){
+    fn get_part_files_and_delete_them() {
         use std::fs::File;
         use std::path::Path;
 
@@ -130,12 +139,13 @@ mod tests {
         let source_file: String = "text_fs_extra.txt".to_string();
         let source_file_part: String = "text_fs_extra.part".to_string();
 
-
         //Create source dir
         let create_dir = fs::create_dir(source_dir.clone());
         match create_dir {
             Ok(_) => {}
-            Err(e) => {println!("Did already exist? We push on: {}", e.to_string())}
+            Err(e) => {
+                println!("Did already exist? We push on: {}", e.to_string())
+            }
         }
         //Put a file in the source dir
         File::create(format!("{}/{source_file}", source_dir.clone()))
@@ -146,16 +156,40 @@ mod tests {
         let files = fs::read_dir(Path::new(&source_dir)).unwrap();
         for x in files {
             let name = x.unwrap().path().display().to_string();
-            if name.ends_with("part"){
-                println!("Found file in dir {}, removing file {}", source_dir.clone(),name);
-                fs::remove_file(Path::new(&format!("{}",  name))).unwrap();
+            if name.ends_with("part") {
+                println!(
+                    "Found file in dir {}, removing file {}",
+                    source_dir.clone(),
+                    name
+                );
+                fs::remove_file(Path::new(&format!("{}", name))).unwrap();
             }
-
         }
-        let part_file_removed = Path::new(&format!("{}/{}",source_dir.clone(), source_file_part)).exists();
-        let file_remains = Path::new(&format!("{}/{}",source_dir.clone(), source_file)).exists();
+        let part_file_removed =
+            Path::new(&format!("{}/{}", source_dir.clone(), source_file_part)).exists();
+        let file_remains = Path::new(&format!("{}/{}", source_dir.clone(), source_file)).exists();
         fs::remove_dir_all(source_dir.clone()).unwrap();
         assert!(!part_file_removed);
         assert!(file_remains);
+    }
+
+    #[test]
+    fn test_one_hour() {
+        let duration = Duration::hours(1);
+        assert_eq!(render_duration_readable(duration), "01:00:00");
+    }
+
+    #[test]
+    fn test_one_minute_one_second() {
+        let mut duration = Duration::minutes(1);
+        duration = duration +  Duration::seconds(1);
+        assert_eq!(render_duration_readable(duration), "00:01:01");
+    }
+
+    #[test]
+    fn test_one_minute_61_seconds() {
+        let mut duration = Duration::minutes(1);
+        duration = duration +  Duration::seconds(61);
+        assert_eq!(render_duration_readable(duration), "00:02:01");
     }
 }
