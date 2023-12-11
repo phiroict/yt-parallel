@@ -57,3 +57,5 @@ push_container:
 deploy_container: build_linux_arm build_container_arm push_container
 arch_package:
 	cargo pkgbuild
+publish:
+	cargo publish
