@@ -398,7 +398,7 @@ fn process_videos(
     }
     let move_time_end = Local::now();
     let move_time = move_time_end - move_time_start;
-    info!("Move took {} minutes", render_duration_readable(move_time));
+    info!("Move took {} hours", render_duration_readable(move_time));
     Ok(())
 }
 
