@@ -3,7 +3,7 @@ name = "yt-parallel"
 version = "0.5.10"
 edition = "2021"
 authors = ["Philip Rodrigues<phil@phiroict.co.nz>"]
-license = "GPL-3-or-later"
+license = "GPL-2.0-or-later"
 repository ="https://github.com/phiroict/yt-parallel"
 description = "This application runs download tools (default is yt-dlp) in parallel to download batches of videos."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
