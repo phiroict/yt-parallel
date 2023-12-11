@@ -11,6 +11,7 @@ init:
 	cargo install --force cargo-outdated
 	cargo install --force cargo-update
 	cargo install --force cargo-semver-tool
+	cargo install cargo-pkgbuild
 init_fedora:
 	sudo yum install gcc openssl openssl-devel yt-dlp python-pip -y 
 init_arch:
@@ -54,3 +55,5 @@ all_container_arm: build_linux_arm build_container_arm run_container_arm
 push_container:
 	docker push phiroict/yt-parallel:$(APP_VERSION)
 deploy_container: build_linux_arm build_container_arm push_container
+arch_package:
+	cargo pkgbuild
