@@ -1,4 +1,4 @@
-# yt-parallel
+ # yt-parallel
 yt-dlp is a video file downloader, it has been designed to download one file at the time. It is quick enough but if you have a set of downloads it is faster 
 when running in parallel. Now this is use-case that works for me, so your milage may vary, it is also a nice Rust exercise. You list a list of video urls in a textfile and then download it as a batch. It will place it in a folder that is the current date for instance 20240101 and at the end it moves it to a location that could be on a SAN/NAS so then it is shared.  
 In short: 

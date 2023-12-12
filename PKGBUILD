@@ -10,8 +10,11 @@ build() {
 
 package() {
     cargo install --root="$pkgdir" yt-parallel
+    rm -f "${pkgdir}/.crates.toml"
+    rm -f "${pkgdir}/.crates2.json"
 }
+
 pkgdesc="A way to run downloads from yt-dlp in parallel"
-url="https://github.com/phiroict/yt-parallel/archive/refs/tags/v0.5.10.tar.gz"
-license="GPL-3-or-later"
+url="https://github.com/phiroict/yt-parallel"
+license=("GPL-3-or-later")
 depends=('yt-dlp>=2023.11.16')
