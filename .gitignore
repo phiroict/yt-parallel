@@ -3,3 +3,4 @@ videolist.txt
 202*/
 pkg/
 *.zst
+src/yt-parallel
