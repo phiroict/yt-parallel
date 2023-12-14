@@ -136,8 +136,8 @@ fn prune_partial_files(source: &String, source_path: &&Path) {
         let name = x.unwrap().path().display().to_string();
         debug!("Processing file {}", name);
         if name.ends_with("part") {
-            info!(
-                "Found file in dir {}, removing file {}",
+            warn!(
+                "Found partial file in dir {}, removing file {}",
                 source.clone(),
                 name
             );
