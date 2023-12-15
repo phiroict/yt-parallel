@@ -147,9 +147,9 @@ fn prune_partial_files(source: &String, source_path: &&Path) {
 }
 
 fn render_duration_readable(duration: Duration) -> String {
-    let hours = format!("{:0>2}",duration.num_hours());
-    let minutes = format!("{:0>2}",duration.num_minutes() % 60);
-    let seconds = format!("{:0>2}",duration.num_seconds() % 60);
+    let hours = format!("{:0>2}", duration.num_hours());
+    let minutes = format!("{:0>2}", duration.num_minutes() % 60);
+    let seconds = format!("{:0>2}", duration.num_seconds() % 60);
     return format!("{}:{}:{}", hours, minutes, seconds);
 }
 
@@ -233,15 +233,10 @@ fn main() -> io::Result<()> {
 
     info!(
         "Process concluded at {end_time} while started at {start_time} it took {} hours",
-         render_duration_readable(time_passed) ,
-
+        render_duration_readable(time_passed),
     );
     Ok(())
 }
-
-
-
-
 
 /// Go to the list of urls from param `file` and place them into the folder from param `folder_name`
 /// and download them to that folder
@@ -262,8 +257,11 @@ fn process_videos(
     for line in io::BufReader::new(file).lines() {
         // Handle any potential errors, we fail the whole process here as I do not expect failed entries
         let line = line?;
-        // Add the line to the vector so we can feed it to yt-dlp
-        lines.push(line);
+        //Skip emoty lines
+        if line.len() > 1 {
+            // Add the line to the vector so we can feed it to yt-dlp
+            lines.push(line);
+        }
     }
     // Some information we want to keep track of to tell the user where we are in the process.
     let number_of_items = lines.len();

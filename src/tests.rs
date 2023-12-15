@@ -1,9 +1,11 @@
 #[cfg(test)]
 mod tests {
     use crate::logging::initialize_logging;
-    use crate::{check_downloader_present, evaluate_move_path, move_to_nas, render_duration_readable};
-    use std::fs;
+    use crate::{
+        check_downloader_present, evaluate_move_path, move_to_nas, render_duration_readable,
+    };
     use chrono::Duration;
+    use std::fs;
 
     #[test]
     fn app_present() {
@@ -182,14 +184,14 @@ mod tests {
     #[test]
     fn test_one_minute_one_second() {
         let mut duration = Duration::minutes(1);
-        duration = duration +  Duration::seconds(1);
+        duration = duration + Duration::seconds(1);
         assert_eq!(render_duration_readable(duration), "00:01:01");
     }
 
     #[test]
     fn test_one_minute_61_seconds() {
         let mut duration = Duration::minutes(1);
-        duration = duration +  Duration::seconds(61);
+        duration = duration + Duration::seconds(61);
         assert_eq!(render_duration_readable(duration), "00:02:01");
     }
 }
