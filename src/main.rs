@@ -24,14 +24,14 @@ enum LogLevel {
 }
 
 fn get_string_from_loglevel(val: LogLevel) -> String {
-    let ret_val = match val {
+    let log_level_parsed = match val {
         LogLevel::Trace => "Trace",
         LogLevel::Debug => "Debug",
         LogLevel::Info => "Info",
         LogLevel::Warn => "Warn",
         LogLevel::Error => "Error",
     };
-    String::from(ret_val)
+    String::from(log_level_parsed)
 }
 
 #[derive(Parser)]
@@ -254,6 +254,7 @@ fn process_videos(
     let mut lines: Vec<String> = Vec::new();
 
     // Read the file line by line
+
     for line in io::BufReader::new(file).lines() {
         // Handle any potential errors, we fail the whole process here as I do not expect failed entries
         let line = line?;
