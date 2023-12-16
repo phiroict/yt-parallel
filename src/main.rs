@@ -206,7 +206,7 @@ fn main() -> io::Result<()> {
     match file {
         Ok(fs) => {
             info!("File found and opened");
-            let process_result = process_videos(&folder_name, fs, args.move_target);
+            let process_result = process_videos(&folder_name, fs, &args.move_target);
             match process_result {
                 Ok(_) => {
                     info!("Processing video completed")
@@ -248,7 +248,7 @@ fn main() -> io::Result<()> {
 fn process_videos(
     folder_name: &String,
     file: File,
-    move_target: String,
+    move_target: &String,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Create a vector to store the lines that consists of urls to a youtube (or other) clip. Note it is mutable as we add to it.
     let mut lines: Vec<String> = Vec::new();
@@ -257,19 +257,19 @@ fn process_videos(
     // lines that fail from some other reason.
     // We collect the lines, then enumerate it to add an index we use for logging, filter out empty lines and lines that
     // fail for another reason. then use the for each to process the ones that passed through the filter.
-    let _ = io::BufReader::new(file)
+    io::BufReader::new(file)
         .lines()
         .enumerate()
         .filter(|(_, line)| line.as_ref().unwrap_or(&"".to_string()).len() > 1)
         .for_each(|(ix, line)| match line {
             Ok(line) => {
-                debug!("Added line {}, index: {} to the list to download", line, ix);
+                debug!("Added line {}, index: {} to the list to download", line, ix+1);
                 lines.push(line)
             }
             Err(e) => {
                 warn!(
                     "Could not parse line {}, skipping it, error: {}",
-                    ix,
+                    ix+1,
                     e.to_string()
                 );
             }
@@ -279,12 +279,15 @@ fn process_videos(
     let number_of_items = lines.len();
     debug!("Number of items to process: {}", number_of_items);
     let mut iterator_items_index = 1;
-    // Setup the communication with the threads, we create the number of download channels.
+    // Setup the communication with the threads, we create the number of download channels and they are passed one for
+    // one in the threads.
     let (tx, rx) = sync_channel(lines.len());
     // Create an array that can hold all the thread handles so we can join them down the line
     let mut thread_pool = vec![];
     // Process the lines in the array, create a thread for each download
     for line in &lines {
+        // We move the transmitter into the thread, so we need to create a clone if it, as it is a Arc it will just
+        // increase the reference counter.
         let tx = tx.clone();
         // Do something with each line
         info!("Processing {}", line);
@@ -304,7 +307,7 @@ fn process_videos(
                 thread::current().id(),
                 &cline
             );
-            let output = Command::new(format!("yt-dlp"))
+            let output = Command::new("yt-dlp")
                 .arg("--sponsorblock-remove")
                 .arg("default")
                 .arg("--retries")
@@ -361,16 +364,18 @@ fn process_videos(
     // the channels are dropped and the while loop below will exit.
     drop(tx);
     // While there a channels open, wait till they all have sent their message, then when there are
-    // none left, the recv will fail (We dropped the transmitter above) and we leave the loop.
+    // none left, the recv will fail (We dropped the transmitter above) and we leave the loop as there would be no Ok() message.
     while let Ok(msg) = rx.recv() {
         info!("{msg}, {iterator_items_index} from {number_of_items}");
         iterator_items_index += 1;
     }
-    // Join all threads to we can start moving when all downloads have been completed.
+    // Join all threads to we can start moving when all downloads have been completed. Note we clone the ids as they are
+    // moved after use.
     for t in thread_pool {
         let current_thread = t.thread().id().clone();
         trace!("About the join thread {:?}", t.thread().id().clone());
-        let join_result = t.join(); //After join the t variable is moved and cannot be referenced again.
+        let join_result = t.join();
+        // Use the join result to inquire the result. The thread variable is dropped after join.
         match join_result {
             Ok(jr) => {
                 debug!("Join of thread {:?} has succeeded", jr);
@@ -385,16 +390,15 @@ fn process_videos(
 
         trace!("Joined thread {:?}", current_thread);
     }
-    // Change your destination path in here, as I am using two OSes I make a selection here how to
-    // handle the move, pretty sure this will not scale to your setup 😉.
 
     // Rust has some useful constants baked in, one of them is the OS that holds the OS it is running on.
     let os_running = env::consts::OS;
 
     // Default when running linux, I run Arch by the way 😎
     debug!("Set the path to linux path as default, other OS will overwrite, the current OS is {os_running}");
-
-    let path_to_nas = evaluate_move_path(os_running, move_target.clone());
+    // The path will set the move path here, either by attribute '-m' or the defaults set by OS. The defaults may not
+    // make sense on your system so change them if needed.
+    let path_to_nas = evaluate_move_path(os_running, move_target);
 
     // Using the MacOS/Linux move tool here, there are ways to do this in Rust but it is a bit
     // cumbersome and I did not feel like reinventing the mv statement.
@@ -413,10 +417,10 @@ fn process_videos(
     Ok(())
 }
 
-fn evaluate_move_path(os_running: &str, path_to_nas: String) -> String {
+fn evaluate_move_path(os_running: &str, path_to_nas: &String) -> String {
     // If no path is set, get the defaults for the OSes.
     let mut ret_val = String::from("");
-    if path_to_nas.clone().eq("") {
+    if path_to_nas.eq("") {
         // Bit if a hack to format a standard windows path.
 
         if os_running.eq("macos") {
@@ -428,6 +432,9 @@ fn evaluate_move_path(os_running: &str, path_to_nas: String) -> String {
         } else if os_running.eq("linux") {
             debug!("Set the path as set in windows overwriting the linux path");
             ret_val = String::from("/home/phiro/huge/media/youtube/");
+        } else {
+            debug!("Did not recognize os: {} just move it to temp", os_running);
+            ret_val = String::from("/tmp/");
         }
         info!("There is no default path set for the move target, so we use the default: {ret_val}");
     } else {
