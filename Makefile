@@ -31,7 +31,7 @@ run_win:
 version:
 	cargo semver bump patch && cargo build --release
 deploy: check test version
-	 sudo -S cp target/release/yt-parallel /usr/local/bin/ && git commit -am "Linux Release commit" && git tag v$(shell bash get_version_from_toml.sh)
+	sudo -S cp target/release/yt-parallel /usr/local/bin/ && git commit -am "Linux Release commit" && git tag v$(shell bash get_version_from_toml.sh)
 deploy_win: check test version
 	cmd /C  XCOPY target\release\yt-parallel.exe I:\Apps\ /y /q && git commit -am "Windows Release commit" && cmd /C python.exe get_version_from_toml.py
 build_container_arm:
