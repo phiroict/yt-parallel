@@ -250,22 +250,34 @@ fn process_videos(
     file: File,
     move_target: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    // Create a vector to store the lines that consists of urls to a youtube (or other) clip.
+    // Create a vector to store the lines that consists of urls to a youtube (or other) clip. Note it is mutable as we add to it.
     let mut lines: Vec<String> = Vec::new();
+    trace!("In the process vidoes method");
+    // Read the file line by line, if valid, add it to the lines collection to parse later. Ignore the empty lines and
+    // lines that fail from some other reason.
+    // We collect the lines, then enumerate it to add an index we use for logging, filter out empty lines and lines that
+    // fail for another reason. then use the for each to process the ones that passed through the filter.
+    let _ = io::BufReader::new(file)
+        .lines()
+        .enumerate()
+        .filter(|(_, line)| line.as_ref().unwrap_or(&"".to_string()).len() > 1)
+        .for_each(|(ix, line)| match line {
+            Ok(line) => {
+                debug!("Added line {}, index: {} to the list to download", line, ix);
+                lines.push(line)
+            }
+            Err(e) => {
+                warn!(
+                    "Could not parse line {}, skipping it, error: {}",
+                    ix,
+                    e.to_string()
+                );
+            }
+        });
 
-    // Read the file line by line
-
-    for line in io::BufReader::new(file).lines() {
-        // Handle any potential errors, we fail the whole process here as I do not expect failed entries
-        let line = line?;
-        //Skip emoty lines
-        if line.len() > 1 {
-            // Add the line to the vector so we can feed it to yt-dlp
-            lines.push(line);
-        }
-    }
     // Some information we want to keep track of to tell the user where we are in the process.
     let number_of_items = lines.len();
+    debug!("Number of items to process: {}", number_of_items);
     let mut iterator_items_index = 1;
     // Setup the communication with the threads, we create the number of download channels.
     let (tx, rx) = sync_channel(lines.len());
