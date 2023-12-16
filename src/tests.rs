@@ -51,7 +51,7 @@ mod tests {
     fn move_path_evaluation_pass_path() {
         let test_target = "/usr/local/bin/test";
         let os_type = "windows";
-        let result_path = evaluate_move_path(os_type, test_target.to_string());
+        let result_path = evaluate_move_path(os_type, &test_target.to_string());
         assert_eq!(test_target, result_path);
     }
 
@@ -59,7 +59,7 @@ mod tests {
     fn move_path_evaluation_no_path_os_windows() {
         let test_target = "";
         let os_type = "windows";
-        let result_path = evaluate_move_path(os_type, test_target.to_string());
+        let result_path = evaluate_move_path(os_type, &test_target.to_string());
         assert_eq!("M:/youtube/", result_path);
     }
 
@@ -67,7 +67,7 @@ mod tests {
     fn move_path_evaluation_no_path_os_macos() {
         let test_target = "";
         let os_type = "macos";
-        let result_path = evaluate_move_path(os_type, test_target.to_string());
+        let result_path = evaluate_move_path(os_type, &test_target.to_string());
         assert_eq!("/Volumes/huge/media/youtube/", result_path);
     }
 

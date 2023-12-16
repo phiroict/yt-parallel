@@ -418,8 +418,8 @@ fn process_videos(
 }
 
 fn evaluate_move_path(os_running: &str, path_to_nas: &String) -> String {
-    // If no path is set, get the defaults for the OSes.
-    let mut ret_val = String::from("");
+    // Set the ret_val scope, As all paths set it, we do not need to initialize it to anything.
+    let ret_val:String;
     if path_to_nas.eq("") {
         // Bit if a hack to format a standard windows path.
 
