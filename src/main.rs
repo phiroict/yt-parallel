@@ -130,8 +130,8 @@ fn move_to_nas(source: String, target: String) -> bool {
     }
 }
 
-/// Remove part files before moving as they would not play anyway 
-/// # Parameters 
+/// Remove part files before moving as they would not play anyway
+/// # Parameters
 /// source - String of the file that is processed <br/>
 /// source_path - Path of the folder to iterate through  <br/>
 /// # Returns
