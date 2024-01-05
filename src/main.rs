@@ -270,13 +270,17 @@ fn process_videos(
         .filter(|(_, line)| line.as_ref().unwrap_or(&"".to_string()).len() > 1)
         .for_each(|(ix, line)| match line {
             Ok(line) => {
-                debug!("Added line {}, index: {} to the list to download", line, ix+1);
+                debug!(
+                    "Added line {}, index: {} to the list to download",
+                    line,
+                    ix + 1
+                );
                 lines.push(line)
             }
             Err(e) => {
                 warn!(
                     "Could not parse line {}, skipping it, error: {}",
-                    ix+1,
+                    ix + 1,
                     e.to_string()
                 );
             }
@@ -426,7 +430,7 @@ fn process_videos(
 
 fn evaluate_move_path(os_running: &str, path_to_nas: &String) -> String {
     // Set the ret_val scope, As all paths set it, we do not need to initialize it to anything.
-    let ret_val:String;
+    let ret_val: String;
     if path_to_nas.eq("") {
         // Bit if a hack to format a standard windows path.
 
