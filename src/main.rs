@@ -447,7 +447,7 @@ fn evaluate_move_path(os_running: &str, path_to_nas: &String) -> String {
             debug!("Did not recognize os: {} just move it to temp", os_running);
             ret_val = String::from("/tmp/");
         }
-        info!("There is no default path set for the move target, so we use the default: {ret_val}");
+        info!("There is no parameter passed path set for the move target, so we use the default: {ret_val}");
     } else {
         info!("Move path set for the move target by argument: {path_to_nas}");
         ret_val = String::from(path_to_nas);
