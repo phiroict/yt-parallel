@@ -130,6 +130,12 @@ fn move_to_nas(source: String, target: String) -> bool {
     }
 }
 
+/// Remove part files before moving as they would not play anyway
+/// # Parameters
+/// source - String of the file that is processed <br/>
+/// source_path - Path of the folder to iterate through  <br/>
+/// # Returns
+/// Nothing
 fn prune_partial_files(source: &String, source_path: &&Path) {
     let files = fs::read_dir(Path::new(&source_path)).unwrap();
     for x in files {
@@ -241,8 +247,9 @@ fn main() -> io::Result<()> {
 /// Go to the list of urls from param `file` and place them into the folder from param `folder_name`
 /// and download them to that folder
 /// # Parameters
-/// file - Handle to a file that has the yt urls as a `\n` separated list.
-/// folder_name - The string that has the path of the directory to download to
+/// file - Handle to a file that has the yt urls as a `\n` separated list.<br/>
+/// folder_name - The string that has the path of the directory to download to<br/>
+/// move_target - The string of the path you want to move the files to when done downloaded<br/>
 /// ## Return
 /// Nothing on ok, and a generic Error object on error.
 fn process_videos(
