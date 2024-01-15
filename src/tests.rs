@@ -60,7 +60,7 @@ mod tests {
         let test_target = "";
         let os_type = "windows";
         let result_path = evaluate_move_path(os_type, &test_target.to_string());
-        assert_eq!("M:/youtube/", result_path);
+        assert_eq!("H:/media/youtube/", result_path);
     }
 
     #[test]
