@@ -27,7 +27,7 @@ build: check test
 run:
 	cargo run
 run_win:
-	cd target/debug && yt-parallel.exe -l "I:/Apps/videolist.txt"
+	cd target/debug && yt-parallel.exe -l "M:/Apps/videolist.txt"
 version:
 	cargo semver bump patch && cargo build --release
 deploy: check test version
