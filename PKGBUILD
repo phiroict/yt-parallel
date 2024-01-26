@@ -1,6 +1,6 @@
 # Maintainer: Philip Rodrigues<phil@phiroict.co.nz>
 pkgname=yt-parallel
-pkgver=0.5.14
+pkgver=0.5.19
 pkgrel=1
 makedepends=('rust' 'cargo')
 arch=('i686' 'x86_64' 'armv6h' 'armv7h')

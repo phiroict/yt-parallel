@@ -59,3 +59,5 @@ arch_package:
 	cargo pkgbuild
 publish:
 	cargo publish
+docker_build:
+	docker build -t phiroict/yt-parallel:0.5.19 -f deploy/docker/Dockerfile .
