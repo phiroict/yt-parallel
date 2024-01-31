@@ -442,7 +442,7 @@ fn evaluate_move_path(os_running: &str, path_to_nas: &String) -> String {
             ret_val = String::from("H:/media/youtube/");
         } else if os_running.eq("linux") {
             debug!("Set the path as set in windows overwriting the linux path");
-            ret_val = String::from("/home/phiro/huge/media/youtube/");
+            ret_val = String::from("/home/phiro/mac/huge/media/youtube/");
         } else {
             debug!("Did not recognize os: {} just move it to temp", os_running);
             ret_val = String::from("/tmp/");
