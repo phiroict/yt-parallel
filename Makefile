@@ -38,7 +38,8 @@ build_container_arm:
 	docker build -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
 build_container_fedora_arm:
 	podman build -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
-
+build_container_init:
+	docker buildx build -t phiroict/yt-parallel-init:$(APP_VERSION) -f Dockerfile .
 run_container_arm:
 	-docker rm yt-parallel
 	docker run \
