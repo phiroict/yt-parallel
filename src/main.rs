@@ -327,6 +327,8 @@ fn process_videos(
                 .arg("infinite")
                 .arg("--buffer-size")
                 .arg("16K")
+                .arg("-f")
+                .arg("bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best")
                 .arg(&cline)
                 .current_dir(cfn)
                 .stdout(Stdio::piped())
