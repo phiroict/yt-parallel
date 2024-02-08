@@ -9,11 +9,17 @@
 # https://github.com/docker/awesome-compose
 services:
   server:
-    build:
-      context: .
-      target: final
-    ports:
-      - 2:2
+    user: "10001:10001"
+    image: phiroict/yt-parallel-arm:0.5.22
+#    build:
+#      context: .
+#      target: final
+    container_name: yt-parallel
+    volumes:
+      - ${PWD}/videolist.txt:/configuration/videolist.txt
+      - ${PWD}/output:/output
+
+
 
 # The commented out section below is an example of how to define a PostgreSQL
 # database that your application can use. `depends_on` tells Docker Compose to

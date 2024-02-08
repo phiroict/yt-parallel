@@ -45,11 +45,11 @@ run_container_arm:
 	docker run \
 		--rm  \
 		--name yt-parallel \
-		--platform linux/x86_64 \
+		--platform linux/arm64 \
 		-it \
-		--mount type=bind,source=.,target=/home/phiro/mounts/Volume_1/youtube/ \
-		--mount type=bind,source=$(shell pwd)/videolist.txt,target=/app/source/videolist.txt \
-		phiroict/yt-parallel:$(APP_VERSION)
+		--mount type=bind,source=$(shell pwd)/output,target=/output \
+		--mount type=bind,source=$(shell pwd)/videolist.txt,target=/configuration/videolist.txt \
+		phiroict/yt-parallel-arm:$(APP_VERSION) sh
 build_linux_arm:
 	cargo build --release --target x86_64-unknown-linux-gnu
 all_container_arm: build_linux_arm build_container_arm run_container_arm
@@ -61,4 +61,8 @@ arch_package:
 publish:
 	cargo publish
 docker_build:
-	docker build -t phiroict/yt-parallel:0.5.19 -f deploy/docker/Dockerfile .
+	docker build -t phiroict/yt-parallel:0.5.22 -f deploy/docker/Dockerfile .
+docker_build_arm:
+	docker build -t phiroict/yt-parallel-arm:$(APP_VERSION) -f Dockerfile .
+docker_run:
+	docker compose up

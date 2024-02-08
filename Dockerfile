@@ -61,11 +61,15 @@ xx-verify /bin/server
 # By specifying the "3.18" tag, it will use version 3.18 of alpine. If
 # reproducability is important, consider using a digest
 # (e.g., alpine@sha256:664888ac9cfd28068e062c991ebcff4b4c7307dc8dd4df9e728bedde5c449d91).
-FROM alpine:3.18 AS final
+FROM alpine:3.18.6 AS final
 
+RUN apk add yt-dlp
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
 ARG UID=10001
+RUN mkdir /configuration
+RUN mkdir /output
+RUN mkdir /app
 RUN adduser \
     --disabled-password \
     --gecos "" \
@@ -74,13 +78,15 @@ RUN adduser \
     --no-create-home \
     --uid "${UID}" \
     appuser
+RUN chown appuser:appuser -R /configuration
+RUN chown appuser:appuser -R /output
+RUN chown appuser:appuser -R /app
+
 USER appuser
 
-# Copy the executable from the "build" stage.
-COPY --from=build /bin/server /bin/
 
-# Expose the port that the application listens on.
-EXPOSE 2
+# Copy the executable from the "build" stage.
+COPY --from=build /bin/server /app/
 
 # What the container should run when it is started.
-CMD ["/bin/server"]
+CMD ["/app/server", "-l /configuration/videolist.txt", "-m", "/output/", "-d", "trace"]
