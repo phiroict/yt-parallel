@@ -61,7 +61,7 @@ arch_package:
 publish:
 	cargo publish
 docker_build:
-	docker build -t phiroict/yt-parallel:0.5.22 -f deploy/docker/Dockerfile .
+	docker build -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile .
 docker_build_arm:
 	docker build -t phiroict/yt-parallel-arm:$(APP_VERSION) -f Dockerfile .
 docker_run:
