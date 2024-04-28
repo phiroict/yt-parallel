@@ -66,3 +66,5 @@ docker_build_arm:
 	docker build -t phiroict/yt-parallel-arm:$(APP_VERSION) -f Dockerfile .
 docker_run:
 	docker compose up
+sonar:
+	/opt/sonar-scanner/bin/sonar-scanner -Dsonar.projectKey=rust -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.login=sqp_cf85d16d67b2a05e83a77e6cdb701c873c2be01f
