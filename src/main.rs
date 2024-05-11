@@ -53,7 +53,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// Check downloader present,
 /// Checks whether the yt-dlp app is attainable in the path on the OS.
 /// # Parameters
-/// command [String]: The command that is the actual appication to download the yt file with.
+/// command [String]: The command that is the actual application to download the yt file with.
 /// # Returns
 /// True when present, else false. Does not processes errors, it will return false on error.
 pub fn check_downloader_present(command: String) -> bool {
@@ -70,7 +70,7 @@ pub fn check_downloader_present(command: String) -> bool {
 /// source - string of the path pointing the source, the path must exist on the system and accessible for read/write
 /// target - string of the destination, the path must exist on the system and accessible for read/write
 /// # Returns
-/// True on succesful move, else false, it will panic out when a system error occurs.
+/// True on successful move, else false, it will panic out when a system error occurs.
 fn move_to_nas(source: String, target: String) -> bool {
     debug!(
         "Entered the move_nas function, moving from {} to {}",

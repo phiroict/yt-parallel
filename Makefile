@@ -33,7 +33,7 @@ version:
 deploy: check test version
 	sudo -S cp target/release/yt-parallel /usr/local/bin/ && git commit -am "Linux Release commit" && git tag v$(shell bash get_version_from_toml.sh)
 deploy_win: check test version
-	cmd /C  XCOPY target\release\yt-parallel.exe M:\Apps\ /y /q && git commit -am "Windows Release commit" && cmd /C python.exe get_version_from_toml.py
+	cmd /C  XCOPY target\release\yt-parallel.exe C:\Users\PhiRo\Apps\ /y /q && git commit -am "Windows Release commit" && cmd /C python.exe get_version_from_toml.py
 build_container_arm:
 	docker build -t phiroict/yt-parallel:$(APP_VERSION) -f deploy/docker/Dockerfile_arm .
 build_container_fedora_arm:
