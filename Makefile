@@ -11,7 +11,7 @@ init:
 	cargo install --force cargo-outdated
 	cargo install --force cargo-update
 	cargo install --force cargo-semver-tool
-	cargo install --force cargo-pkgbuild
+	# cargo install --force cargo-pkgbuild
 init_fedora:
 	sudo yum install gcc openssl openssl-devel yt-dlp python-pip -y 
 init_arch:
