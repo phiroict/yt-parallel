@@ -9,7 +9,7 @@ use log::{debug, error, info, trace, warn};
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
-use std::process::{exit, Command, Stdio};
+use std::process::{Command, Stdio, exit};
 use std::sync::mpsc::sync_channel;
 use std::{env, fs, thread};
 use which::which;
@@ -125,7 +125,11 @@ fn move_to_nas(source: String, target: String) -> bool {
             }
         }
     } else {
-        warn!("Either source or target directory does not exist or has no access. Source exist:{}, Target exist: {}", source_path.exists(), target_path.exists());
+        warn!(
+            "Either source or target directory does not exist or has no access. Source exist:{}, Target exist: {}",
+            source_path.exists(),
+            target_path.exists()
+        );
         false
     }
 }
@@ -408,7 +412,9 @@ fn process_videos(
     let os_running = env::consts::OS;
 
     // Default when running linux, I run Arch by the way 😎
-    debug!("Set the path to linux path as default, other OS will overwrite, the current OS is {os_running}");
+    debug!(
+        "Set the path to linux path as default, other OS will overwrite, the current OS is {os_running}"
+    );
     // The path will set the move path here, either by attribute '-m' or the defaults set by OS. The defaults may not
     // make sense on your system so change them if needed.
     let path_to_nas = evaluate_move_path(os_running, move_target);
@@ -449,7 +455,9 @@ fn evaluate_move_path(os_running: &str, path_to_nas: &String) -> String {
             debug!("Did not recognize os: {} just move it to temp", os_running);
             ret_val = String::from("/tmp/");
         }
-        info!("There is no parameter passed path set for the move target, so we use the default: {ret_val}");
+        info!(
+            "There is no parameter passed path set for the move target, so we use the default: {ret_val}"
+        );
     } else {
         info!("Move path set for the move target by argument: {path_to_nas}");
         ret_val = String::from(path_to_nas);

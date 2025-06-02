@@ -1,6 +1,6 @@
 use chrono::Local;
 use env_logger::Builder;
-use log::{trace, LevelFilter};
+use log::{LevelFilter, trace};
 use std::{io::Write, str::FromStr};
 use uuid::Uuid;
 
