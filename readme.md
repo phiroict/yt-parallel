@@ -7,6 +7,33 @@ these downloads in parallel.
 It is possible to use another download tool by passing it in the commandline for instance: `yt-parallel --video-download-tool your-tool-here`
 Note that there are a lot of local settings here that you need to adapt to your needs, check the 
 code comments for this. There are a number of arguments you can pass. 
+Now this was a study project for me to learn Rust, so it is not a full blown application, but it works for me.
+Note that this bash script does the same: 
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+TARGET=/run/media/phiro/huge/media/youtube
+LIST="$HOME/Desktop/videolist.txt"
+YTDLP_OPTS=(
+  --sponsorblock-remove default
+  --fragment-retries infinite
+  --buffer-size 16K
+)
+FOLDER=$(date +%Y%m%d)
+mkdir -p "${TARGET}/${FOLDER}" || exit 2
+cd "${TARGET}/${FOLDER}" || exit 1
+# Read each URL, fire off yt-dlp in the background, silencing stdout+stderr
+while IFS= read -r url; do
+  yt-dlp "${YTDLP_OPTS[@]}" "$url" > /dev/null 2>&1 &
+done < "$LIST"
+
+# Wait for all background jobs to finish
+wait
+
+cd -
+```
+So, yeah, overengineered for a simple task, but it is a learning exercise.
 
 ## Stack 
 
