@@ -1,6 +1,6 @@
 [package]
 name = "yt-parallel"
-version = "0.5.25"
+version = "0.6.1"
 edition = "2024"
 authors = ["Philip Rodrigues<phil@phiroict.co.nz>"]
 license = "GPL-2.0-or-later"
