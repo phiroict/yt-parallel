@@ -331,6 +331,7 @@ fn process_videos(
                 .arg("infinite")
                 .arg("--buffer-size")
                 .arg("16K")
+                .arg("--no-check-certificate")
                 .arg(&cline)
                 .current_dir(cfn)
                 .stdout(Stdio::piped())

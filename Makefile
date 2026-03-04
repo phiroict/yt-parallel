@@ -13,7 +13,7 @@ init:
 	cargo install --force cargo-semver-tool
 	# cargo install --force cargo-pkgbuild
 init_fedora:
-	sudo yum install gcc openssl openssl-devel yt-dlp python-pip -y 
+	sudo yum install gcc openssl openssl-devel yt-dlp python-pip -y
 init_arch:
 	pacman -S which yt-dlp --needed
 init_mac:
@@ -25,7 +25,7 @@ test:
 build: check test
 	cargo build
 run:
-	cargo run
+	cargo run -- -l /Users/phiro/Desktop/videolist.txt -d trace
 run_win:
 	cd target/debug && yt-parallel.exe -l "M:/Apps/videolist.txt"
 version:
