@@ -27,7 +27,7 @@ build: check test
 run:
 	cargo run -- -l /Users/phiro/Desktop/videolist.txt -d trace
 run_win:
-	cd target/debug && yt-parallel.exe -l "M:/Apps/videolist.txt"
+	cd target/debug && yt-parallel.exe -l "C:\Users\phiro\OneDrive\Bureaublad\videolist.txt" -m "H:\media\youtube"
 version:
 	cargo semver bump patch && cargo build --release
 deploy: check test version
